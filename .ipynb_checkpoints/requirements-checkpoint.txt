@@ -1,0 +1,11 @@
+1- cd C:\Users\moham\Social Media Analytics Dashboard
+2- pip install streamlit pandas altair plotly
+3- streamlit run streamlit_app.py
+
+------------------------
+Libraries Needed are:
+
+streamlit
+pandas
+altair
+plotly

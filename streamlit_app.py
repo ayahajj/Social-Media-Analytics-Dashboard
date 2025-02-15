@@ -17,7 +17,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded")
 
-alt.themes.enable("dark")
+# alt.themes.enable("dark")
 
 #######################
 # CSS styling
@@ -104,23 +104,19 @@ with st.sidebar:
     df_selected_date_posts = df_posts[df_posts['date'].dt.date == selected_date]
     df_selected_date_comments = df_comments[df_comments['comment_date'].dt.date == selected_date]
     
-    # Color theme selection
-    color_theme_list = ['blues', 'cividis', 'greens', 'inferno', 'magma', 'plasma', 'reds', 'rainbow', 'turbo', 'viridis']
-    selected_color_theme = st.selectbox('Select a color theme', color_theme_list)
-    
-    # Get followers per platform
-    followers_per_platform = indicators_generator.get_followers_per_platform()
-
-    # Get engagement metrics
-    engagement_metrics = indicators_generator.get_engagement_metrics()
-
 #######################
 # Dashboard Main Panel
 col1, col2 = st.columns([1, 1], gap="large")
 
 # Column 1: Followers Per Platform
 with col1:
+    # ==========================
+    # Followers Per Platform
+    # ==========================
     st.markdown('##### Followers Per Platform')
+
+    # Get followers per platform
+    followers_per_platform = indicators_generator.get_followers_per_platform()
 
     # Platform images (ensure uniform size)
     platform_base64_icon = {
@@ -130,10 +126,9 @@ with col1:
     }
 
     # Create centered columns for platform cards
-    num_platforms = len(followers_per_platform)
-    platform_cols = st.columns(num_platforms, gap="large")
+    platform_cols = st.columns(len(followers_per_platform), gap="large")
 
-    # Display followers per platform as centered cards with theme-aware colors
+    # Display followers per platform as centered cards
     for index, row in enumerate(followers_per_platform.itertuples()):
         with platform_cols[index]:
             st.markdown(
@@ -165,8 +160,15 @@ with col1:
 
 # Column 2: Engagement Metrics
 with col2:
+    
+    # ==========================
+    # Engagement Metrics
+    # ==========================
     st.markdown('##### Engagement Metrics')
 
+    # Get engagement metrics
+    engagement_metrics = indicators_generator.get_engagement_metrics()
+    
     # Engagement metric icons using local images
     engagement_metrics_data = [
         ("Likes", utils.get_base64_icon("likes.svg"), engagement_metrics["likes"]),
@@ -209,13 +211,13 @@ with col2:
 
 
     # ==========================
-    # Add Traffic Analytics Below
+    # Traffic
     # ==========================
-    st.markdown("---")  # Add a separator line for better visual structure
+    st.markdown("---")  # Add a separator line
 
     traffic_col1, traffic_col2 = st.columns([2, 1])
 
-    # Updated traffic data with YouTube
+    # Get traffic data
     traffic_data = indicators_generator.generate_traffic_data()
     
     with traffic_col1:
@@ -232,20 +234,19 @@ with col2:
             )
 
     with traffic_col2:
-        # Create a donut chart
-        fig, ax = plt.subplots(figsize=(4, 4))  # Slightly increased size for better clarity
-        sizes = [v[1] for v in traffic_data.values()]
+        # Create donut chart
+        fig, ax = plt.subplots(figsize=(4, 4))
         labels = list(traffic_data.keys())
+        percentages = [v[1] for v in traffic_data.values()]
         colors = [v[2] for v in traffic_data.values()]
 
         wedges, texts, autotexts = ax.pie(
-            sizes, labels=None, colors=colors, autopct='%1.0f%%',  # Show percentages
+            percentages, labels=None, colors=colors, autopct='%1.0f%%',  # Show percentages
             wedgeprops={"edgecolor": "white", "linewidth": 2},
             startangle=140,
-            textprops={'fontsize': 12, 'color': 'black', 'weight': 'bold'}  # Ensures visibility
+            textprops={'fontsize': 12, 'color': 'black', 'weight': 'bold'}
         )
 
-        # Draw center circle to create a donut effect
         center_circle = plt.Circle((0, 0), 0.70, fc='white')
         ax.add_artist(center_circle)
 

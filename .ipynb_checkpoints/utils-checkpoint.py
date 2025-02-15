@@ -2,24 +2,26 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 import plotly.express as px
+import os
+import base64
 
 class Utils:
     
-    def __init__(self, df):
-        self.df = df
+    def __init__(self, df_posts, df_comments):
+        self.df_posts = df_posts
+        self.df_comments = df_comments
         
-    # Convert population to text 
-    def format_number(self, num):
-        if num > 1000000:
-            if not num % 1000000:
-                return f'{num // 1000000} M'
-            return f'{round(num / 1000000, 1)} M'
-        return f'{num // 1000} K'
+    # Method to dynamically get the icon paths
+    def get_base64_icon(self, icon_name):
+        """
+        Convert a local image file to a base64-encoded string.
 
-    
-    # Calculation year-over-year population migrations
-    def calculate_population_difference(self, input_df, input_year):
-      selected_year_data = input_df[input_df['year'] == input_year].reset_index()
-      previous_year_data = input_df[input_df['year'] == input_year - 1].reset_index()
-      selected_year_data['population_difference'] = selected_year_data.population.sub(previous_year_data.population, fill_value=0)
-      return pd.concat([selected_year_data.states, selected_year_data.id, selected_year_data.population, selected_year_data.population_difference], axis=1).sort_values(by="population_difference", ascending=False)
+        :param icon_name: File name of the icon (e.g., 'likes.svg')
+        :return: Base64 encoded string of the image
+        """
+        icon_path = os.path.join("icons", icon_name)  # Path to local icons folder
+        try:
+            with open(icon_path, "rb") as img_file:
+                return f"data:image/svg+xml;base64,{base64.b64encode(img_file.read()).decode()}"
+        except FileNotFoundError:
+            return None  # Return None if the file doesn't exist

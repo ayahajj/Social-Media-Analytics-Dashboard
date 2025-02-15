@@ -5,9 +5,36 @@ import plotly.express as px
 
 class IndicatorsGenerator:
     
-    def __init__(self, df):
-        self.df = df
+    def __init__(self, df_posts, df_comments):
+        self.df_posts = df_posts
+        self.df_comments = df_comments
+      
+    
+    # Follower Per Platform
+    def get_followers_per_platform(self):
+        """
+        Returns a dictionary with the total number of followers per platform.
+        """
+        followers_per_platform = self.df_posts.groupby('platform')['followers'].max().reset_index()
+        return followers_per_platform
+
+    # Engagment Per Platform
+    def get_engagement_metrics(self):
+        """
+        Returns a dictionary with the total count of likes, comments, and shares.
+        """
+        total_likes = self.df_posts['likes'].sum()
+        total_comments = self.df_posts['comments'].sum()
+        total_shares = self.df_posts['shares'].sum()
         
+        engagement_metrics = {
+            'likes': total_likes,
+            'comments': total_comments,
+            'shares': total_shares
+        }
+        return engagement_metrics
+    
+    
     # Heatmap
     def make_heatmap(self, input_df, input_y, input_x, input_color, input_color_theme):
         heatmap = alt.Chart(input_df).mark_rect().encode(

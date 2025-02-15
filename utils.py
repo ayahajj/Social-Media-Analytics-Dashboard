@@ -1,7 +1,4 @@
-import streamlit as st
 import pandas as pd
-import altair as alt
-import plotly.express as px
 import os
 import base64
 
@@ -17,14 +14,8 @@ class Utils:
         self.df_posts = df_posts
         self.df_comments = df_comments
         
-    # Method to dynamically get the icon paths
+    # Convert a local image file to a base64-encoded string and return Base64 encoded string of the image
     def get_base64_icon(self, icon_name):
-        """
-        Convert a local image file to a base64-encoded string.
-
-        :param icon_name: File name of the icon (e.g., 'likes.svg')
-        :return: Base64 encoded string of the image
-        """
         icon_path = os.path.join("icons", icon_name)  # Path to local icons folder
         try:
             with open(icon_path, "rb") as img_file:

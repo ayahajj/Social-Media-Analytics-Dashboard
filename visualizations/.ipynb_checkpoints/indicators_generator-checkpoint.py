@@ -10,22 +10,14 @@ class IndicatorsGenerator:
     def __init__(self, df_posts, df_comments):
         self.df_posts = df_posts
         self.df_comments = df_comments
-      
     
-    # Follower Per Platform
+    # Returns a dictionary with the total number of followers per platform.
     def get_followers_per_platform(self):
-        """
-        Returns a dictionary with the total number of followers per platform.
-        """
         followers_per_platform = self.df_posts.groupby('platform')['followers'].max().reset_index()
         return followers_per_platform
 
-    
-    # Engagment Per Platform
+    # Returns a dictionary with the total count of likes, comments, and shares.
     def get_engagement_metrics(self):
-        """
-        Returns a dictionary with the total count of likes, comments, and shares.
-        """
         total_likes = self.df_posts['likes'].sum()
         total_comments = self.df_posts['comments'].sum()
         total_shares = self.df_posts['shares'].sum()
@@ -37,22 +29,15 @@ class IndicatorsGenerator:
         }
         return engagement_metrics
     
-    
-    
+    # Generate traffic analytics data based on views for each platform and 
+    # return dict: {Platform: (Views, Percentage, Color)}
     def generate_traffic_data(self):
-        """
-        Generate traffic analytics data based on views for each platform.
-
-        Returns:
-            dict: {Platform: (Views, Percentage, Color)}
-        """
         if self.df_posts.empty:
             return {}
 
-        # Utils
         utils = Utils(self.df_posts, self.df_comments)
 
-        # Aggregate total views per platform
+        # total views per platform
         platform_views = self.df_posts.groupby("platform")["views"].sum()
 
         # Calculate total views
@@ -62,7 +47,7 @@ class IndicatorsGenerator:
 
         # Generate traffic data
         traffic_data = {
-            platform: (views, views / total_views, utils.PLATFORM_COLORS.get(platform, "#999999"))
+            platform: (views, views / total_views, utils.PLATFORM_COLORS.get(platform, "#000000"))
             for platform, views in platform_views.items()
         }
 

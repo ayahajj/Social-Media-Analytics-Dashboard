@@ -7,6 +7,12 @@ import base64
 
 class Utils:
     
+    PLATFORM_COLORS = {
+        "Facebook": "#4267B2",
+        "Instagram": "#E1306C",
+        "YouTube": "#FF0000"
+    }
+        
     def __init__(self, df_posts, df_comments):
         self.df_posts = df_posts
         self.df_comments = df_comments

@@ -4,6 +4,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 import plotly.express as px
+import matplotlib.pyplot as plt
 
 from visualizations.indicators_generator import IndicatorsGenerator
 from utils import Utils
@@ -84,19 +85,6 @@ utils = Utils(df_posts, df_comments)
 indicators_generator = IndicatorsGenerator(df_posts, df_comments)
 
 #######################
-
-# Apply custom CSS for sidebar width
-st.markdown(
-    """
-    <style>
-        [data-testid="stSidebar"] {
-            min-width: 250px; /* Set sidebar minimum width */
-            max-width: 350px; /* Set sidebar maximum width */
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 # Sidebar
 with st.sidebar:
@@ -220,31 +208,51 @@ with col2:
             )
 
 
+    # ==========================
+    # Add Traffic Analytics Below
+    # ==========================
+    st.markdown("---")  # Add a separator line for better visual structure
 
-            
+    traffic_col1, traffic_col2 = st.columns([2, 1])
 
+    # Updated traffic data with YouTube
+    traffic_data = indicators_generator.generate_traffic_data()
     
-# with col[1]:
-#     st.markdown('#### Total Population')
-    
-#     choropleth = indicators_generator.make_choropleth(df_selected_year, 'states_code', 'population', selected_color_theme, df_selected_year)
-#     st.plotly_chart(choropleth, use_container_width=True)
+    with traffic_col1:
+        st.markdown("### Traffic")
+        for platform, (count, percentage, color) in traffic_data.items():
+            st.markdown(
+                f"""
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="width: 10px; height: 10px; background-color: {color}; border-radius: 50%; display: inline-block; margin-right: 10px;"></span>
+                    <strong>{platform}</strong> &nbsp; {count:,} <span style="color: green;">({int(percentage * 100)}%)</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-# with col[2]:
-#     st.markdown('#### Top States')
+    with traffic_col2:
+        # Create a donut chart
+        fig, ax = plt.subplots(figsize=(4, 4))  # Slightly increased size for better clarity
+        sizes = [v[1] for v in traffic_data.values()]
+        labels = list(traffic_data.keys())
+        colors = [v[2] for v in traffic_data.values()]
 
-#     st.dataframe(df_selected_year_sorted,
-#                  column_order=("states", "population"),
-#                  hide_index=True,
-#                  width=None,
-#                  column_config={
-#                     "states": st.column_config.TextColumn(
-#                         "States",
-#                     ),
-#                     "population": st.column_config.ProgressColumn(
-#                         "Population",
-#                         format="%f",
-#                         min_value=0,
-#                         max_value=max(df_selected_year_sorted.population),
-#                      )}
-#                  )
+        wedges, texts, autotexts = ax.pie(
+            sizes, labels=None, colors=colors, autopct='%1.0f%%',  # Show percentages
+            wedgeprops={"edgecolor": "white", "linewidth": 2},
+            startangle=140,
+            textprops={'fontsize': 12, 'color': 'black', 'weight': 'bold'}  # Ensures visibility
+        )
+
+        # Draw center circle to create a donut effect
+        center_circle = plt.Circle((0, 0), 0.70, fc='white')
+        ax.add_artist(center_circle)
+
+        ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
+
+        # Centralize the donut chart
+        plt.subplots_adjust(left=0.3, right=0.7, top=0.8, bottom=0.2)
+
+        # Display in Streamlit
+        st.pyplot(fig)

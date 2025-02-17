@@ -156,4 +156,63 @@ class IndicatorsGenerator:
         return active_days
 
     
-    
+    def generate_social_interactions_plot(self):
+        """
+        Generates a plot showing total social interactions (sum of likes, comments, shares) over months for different platforms.
+        Each platform will have one curve with custom colors.
+        """
+        
+        utils = Utils(self.df_posts, self.df_comments)
+            
+        # Ensure 'date' column is datetime
+        self.df_posts['date'] = pd.to_datetime(self.df_posts['date'])
+
+        # Extract month and year from the date
+        self.df_posts['month'] = self.df_posts['date'].dt.to_period('M')
+
+        # Aggregate data by month and platform
+        aggregated_data = self.df_posts.groupby(['month', 'platform']).agg({
+            'likes': 'sum',
+            'comments': 'sum',
+            'shares': 'sum'
+        }).reset_index()
+
+        # Calculate total interactions (sum of likes, comments, and shares)
+        aggregated_data['total_interactions'] = (
+            aggregated_data['likes'] + aggregated_data['comments'] + aggregated_data['shares']
+        )
+
+        # Convert 'month' back to string for plotting
+        aggregated_data['month'] = aggregated_data['month'].astype(str)
+
+        # Define custom colors for each platform
+        platform_colors = {
+            'YouTube': utils.PLATFORM_COLORS.get('YouTube', "#000000"),  # Red
+            'Facebook': utils.PLATFORM_COLORS.get('Facebook', "#000000"),  # Facebook Blue
+            'Instagram': utils.PLATFORM_COLORS.get('Instagram', "#000000"),  # Twitter Blue
+            # Add more platforms and colors as needed
+        }
+
+        # Plot the data
+        plt.figure(figsize=(10, 6))
+        for platform in aggregated_data['platform'].unique():
+            platform_data = aggregated_data[aggregated_data['platform'] == platform]
+            plt.plot(
+                platform_data['month'], 
+                platform_data['total_interactions'], 
+                label=platform, 
+                marker='o', 
+                color=platform_colors.get(platform, '#000000')  # Default to black if platform not in the dictionary
+            )
+
+        # Customize the plot
+        plt.xlabel('Month')
+        plt.ylabel('Total Interactions (Likes + Comments + Shares)')
+        plt.title('Total Social Interactions Over Months by Platform')
+        plt.legend(title='Platform')
+        plt.grid(True)
+        plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+        plt.tight_layout()
+
+        # Show the plot in Streamlit
+        st.pyplot(plt)

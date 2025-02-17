@@ -320,3 +320,20 @@ filtered_heatmap_data = heatmap_data[
 
 # Plot the filtered heatmap
 indicators_generator.plot_engagement_heatmap(filtered_heatmap_data)
+
+
+# ==========================
+# Social Interactions Plot
+# ==========================
+st.markdown("---")  # Add a separator line
+st.markdown("### Social Interactions Over Months by Platform")
+
+# Create a single column layout (new row)
+social_interactions_col = st.columns(1)[0]
+
+with social_interactions_col:
+    # Generate the social interactions plot
+    indicators_generator.generate_social_interactions_plot()
+    
+    
+    

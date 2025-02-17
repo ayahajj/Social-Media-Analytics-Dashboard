@@ -322,18 +322,36 @@ filtered_heatmap_data = heatmap_data[
 indicators_generator.plot_engagement_heatmap(filtered_heatmap_data)
 
 
+# # ==========================
+# # Social Interactions Plot
+# # ==========================
+# st.markdown("---")  # Add a separator line
+# st.markdown("### Social Interactions Over Months by Platform")
+
+# # Create a single column layout (new row)
+# social_interactions_col = st.columns(1)[0]
+
+# with social_interactions_col:
+#     # Generate the social interactions plot
+#     indicators_generator.generate_social_interactions_plot()
+    
+    
 # ==========================
 # Social Interactions Plot
 # ==========================
 st.markdown("---")  # Add a separator line
-st.markdown("### Social Interactions Over Months by Platform")
 
-# Create a single column layout (new row)
-social_interactions_col = st.columns(1)[0]
 
-with social_interactions_col:
+# Create a two-column layout
+col1, col2 = st.columns([1, 1], gap="large")
+
+# First column (empty or for other content)
+with col1:
     # Generate the social interactions plot
+    st.markdown("### Social Interactions Over Months by Platform")
     indicators_generator.generate_social_interactions_plot()
     
-    
-    
+# Second column: Social Interactions Plot
+with col2:
+    st.markdown("### Posts Distribution by Content Type")
+    indicators_generator.generate_comments_per_type_pie_chart()

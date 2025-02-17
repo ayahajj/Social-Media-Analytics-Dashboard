@@ -194,7 +194,7 @@ class IndicatorsGenerator:
         }
 
         # Plot the data
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(12, 10))
         for platform in aggregated_data['platform'].unique():
             platform_data = aggregated_data[aggregated_data['platform'] == platform]
             plt.plot(
@@ -213,6 +213,55 @@ class IndicatorsGenerator:
         plt.grid(True)
         plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
         plt.tight_layout()
+
+        # Show the plot in Streamlit
+        st.pyplot(plt)
+        
+        
+        
+        
+    def generate_comments_per_type_pie_chart(self):
+        """
+        Generates a pie chart showing the distribution of comments by content type (e.g., video, photo, album).
+        """
+        # Ensure 'comment_date' column is datetime (if needed for filtering)
+        self.df_comments['comment_date'] = pd.to_datetime(self.df_comments['comment_date'])
+
+        # Merge comments with posts to get content_type
+        merged_data = pd.merge(
+            self.df_comments,
+            self.df_posts[['post_id', 'content_type']],
+            on='post_id',
+            how='left'
+        )
+
+        # Group by content_type and count comments
+        comments_by_type = merged_data.groupby('content_type').size().reset_index(name='comment_count')
+
+        # Calculate percentages
+        comments_by_type['percentage'] = (comments_by_type['comment_count'] / comments_by_type['comment_count'].sum()) * 100
+
+        # Define custom colors for each content type
+        content_type_colors = {
+            'Image': '#FF0000',  # Red
+            'Video': '#3b5998',  # Facebook Blue
+            'Text': '#1DA1F2',  # Twitter Blue
+            # Add more content types and colors as needed
+        }
+
+        # Plot the pie chart
+        plt.figure(figsize=(8, 4))
+        plt.pie(
+            comments_by_type['comment_count'],
+            labels=comments_by_type['content_type'],
+            autopct='%1.1f%%',  # Show percentages
+            colors=[content_type_colors.get(ct, '#000000') for ct in comments_by_type['content_type']],  # Custom colors
+            startangle=140,
+            wedgeprops={'edgecolor': 'white', 'linewidth': 1}  # Add white edges to slices
+        )
+
+        # Add a title
+        # plt.title('Posts Distribution by Content Type')
 
         # Show the plot in Streamlit
         st.pyplot(plt)

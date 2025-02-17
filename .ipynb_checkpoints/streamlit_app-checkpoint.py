@@ -159,25 +159,6 @@ with col1:
                 unsafe_allow_html=True
             )
 
-    # Add Most Active Times Plot below the traffic data
-    st.markdown("---")  # Add a separator line
-    st.markdown("### Most Active Times")
-    
-    if not df_posts.empty:
-        active_times = indicators_generator.generate_most_active_days(start_date='2023-09-01', end_date='2023-10-20', plot=False)
-
-    # Plot the most active days
-        fig, ax = plt.subplots(figsize=(10, 4))  # Adjust the figure size for better fit
-        ax.bar(active_times['day'].astype(str), active_times['post_count'], color=utils.PLATFORM_COLORS.get('Facebook', "#000000"))  # Convert days to strings for plotting
-        ax.set_xlabel('Day')
-        ax.set_ylabel('Number of Posts')
-        ax.set_title('Most Active Days')
-        ax.set_xticks(range(len(active_times)))  # Set x-ticks based on the number of days
-        ax.set_xticklabels(active_times['day'].astype(str), rotation=45)  # Rotate x-axis labels for better readability
-        ax.grid(axis='y')
-        plt.tight_layout()  # Adjust layout to prevent label cutoff
-        st.pyplot(fig)
-
 # Column 2: Engagement Metrics
 with col2:
     
@@ -229,23 +210,55 @@ with col2:
                 unsafe_allow_html=True
             )
 
+# ==========================
+# Most Active Times Plot - Traffic
+# ==========================
 
+st.markdown("")  # Add a separator line
+st.markdown("---")  # Add a separator line
+
+col1, col2 = st.columns([1, 1], gap="large")
+
+# Column 1: Most Active Times Plot
+with col1:
+   
+    # Add Most Active Times Plot below the traffic data
+    st.markdown("### Most Active Times")
+
+    if not df_posts.empty:
+        active_times = indicators_generator.generate_most_active_days(start_date='2023-09-01', end_date='2023-10-20', plot=False)
+
+        # Plot the most active days
+        fig, ax = plt.subplots(figsize=(10, 4))  # Adjust the figure size for better fit
+        ax.bar(active_times['day'].astype(str), active_times['post_count'], color=utils.PLATFORM_COLORS.get('Facebook', "#000000"))  # Convert days to strings for plotting
+        ax.set_xlabel('Day')
+        ax.set_ylabel('Number of Posts')
+        ax.set_title('Most Active Days')
+        ax.set_xticks(range(len(active_times)))  # Set x-ticks based on the number of days
+        ax.set_xticklabels(active_times['day'].astype(str), rotation=45)  # Rotate x-axis labels for better readability
+        ax.grid(axis='y')
+        plt.tight_layout()  # Adjust layout to prevent label cutoff
+        st.pyplot(fig)   
+
+# Column 2: Traffic
+with col2:    
+    
     # ==========================
     # Traffic
     # ==========================
-    st.markdown("---")  # Add a separator line
 
-    traffic_col1, traffic_col2 = st.columns([2, 1])
+    traffic_col1, traffic_col2 = st.columns([2, 1], gap="small")
 
     # Get traffic data
     traffic_data = indicators_generator.generate_traffic_data()
     
     with traffic_col1:
         st.markdown("### Traffic")
+        st.markdown("")
         for platform, (count, percentage, color) in traffic_data.items():
             st.markdown(
                 f"""
-                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;margin-left: 25px;">
                     <span style="width: 10px; height: 10px; background-color: {color}; border-radius: 50%; display: inline-block; margin-right: 10px;"></span>
                     <strong>{platform}</strong> &nbsp; {count:,} <span style="color: green;">({int(percentage * 100)}%)</span>
                 </div>
@@ -255,7 +268,7 @@ with col2:
 
     with traffic_col2:
         # Create donut chart
-        fig, ax = plt.subplots(figsize=(4, 4))
+        fig, ax = plt.subplots(figsize=(5, 5))
         labels = list(traffic_data.keys())
         percentages = [v[1] for v in traffic_data.values()]
         colors = [v[2] for v in traffic_data.values()]
@@ -273,11 +286,11 @@ with col2:
         ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular.
 
         # Centralize the donut chart
-        plt.subplots_adjust(left=0.3, right=0.7, top=0.8, bottom=0.2)
+        plt.subplots_adjust(left=0.3, right=0.7, top=0.85, bottom=0.2)
 
         # Display in Streamlit
         st.pyplot(fig)
-        
+
 # ==========================
 # Engagement Heatmap
 # ==========================
@@ -357,4 +370,7 @@ with col1:
     indicators_generator.generate_social_resharing_plot()
     
 
-    
+# ==========================
+# 
+# ==========================
+st.markdown("---")  # Add a separator line

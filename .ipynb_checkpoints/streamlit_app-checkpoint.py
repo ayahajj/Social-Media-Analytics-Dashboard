@@ -5,6 +5,7 @@ import pandas as pd
 import altair as alt
 import plotly.express as px
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from visualizations.indicators_generator import IndicatorsGenerator
 from utils import Utils
@@ -257,3 +258,46 @@ with col2:
 
         # Display in Streamlit
         st.pyplot(fig)
+        
+# ==========================
+# Engagement Heatmap
+# ==========================
+st.markdown("---")  # Add a separator line
+st.markdown("### Engagement Heatmap by Day and Platform")
+
+
+# Create a single column layout (new row)
+heatmap_col = st.columns(1)[0]  # st.columns(1) returns a list with one column
+
+with heatmap_col:
+    # Generate heatmap data
+    heatmap_data = indicators_generator.generate_engagement_heatmap_data()
+
+# Ensure `day` column is of type datetime
+heatmap_data['day'] = pd.to_datetime(heatmap_data['day'])
+
+# Set a default date range for selection
+date_range = st.date_input("Select Date Range", 
+                           [heatmap_data['day'].min().date(), heatmap_data['day'].max().date()])
+
+# Ensure date_range is always a list with two values
+if isinstance(date_range, tuple):  # Sometimes Streamlit returns a tuple
+    date_range = list(date_range)
+
+if len(date_range) == 1:  # If only one date is selected, duplicate it to create a valid range
+    start_date = date_range[0]
+    end_date = date_range[0]
+else:
+    start_date, end_date = date_range  # Extract two values
+
+# Convert to datetime for filtering
+start_date = pd.to_datetime(start_date)
+end_date = pd.to_datetime(end_date)
+
+# Filter heatmap data based on the selected date range
+filtered_heatmap_data = heatmap_data[
+    (heatmap_data['day'] >= start_date) & (heatmap_data['day'] <= end_date)
+]
+
+# Plot the filtered heatmap
+indicators_generator.plot_engagement_heatmap(filtered_heatmap_data)

@@ -121,5 +121,39 @@ class IndicatorsGenerator:
         st.plotly_chart(fig)
         
         
-        
-        
+    # Analyzes and returns the most active days based on user post activity.
+    # start_date (str, optional): Start date for filtering posts (format: 'YYYY-MM-DD'). Defaults to None.
+    # end_date (str, optional): End date for filtering posts (format: 'YYYY-MM-DD'). Defaults to None.
+    # timezone (str, optional): Timezone to convert the timestamps to. Defaults to 'UTC'.
+    # plot (bool, optional): Whether to plot the results. Defaults to False.
+    # returns: DataFrame: A pandas DataFrame containing the number of posts per day.
+    def generate_most_active_days(self, start_date=None, end_date=None, timezone='UTC', plot=False):
+        if self.df_posts.empty:
+            return None
+
+        # Convert 'date' column to datetime and set timezone
+        self.df_posts['date'] = pd.to_datetime(self.df_posts['date']).dt.tz_localize(timezone)
+
+        # Filter by date range if provided
+        if start_date and end_date:
+            mask = (self.df_posts['date'] >= start_date) & (self.df_posts['date'] <= end_date)
+            self.df_posts = self.df_posts.loc[mask]
+
+        # Extract day from the timestamp
+        self.df_posts['day'] = self.df_posts['date'].dt.date  # Use dt.date for specific dates
+        # Alternatively, use dt.day_name() for day of the week (e.g., Monday, Tuesday)
+
+        # Count posts per day
+        active_days = self.df_posts.groupby('day').size().reset_index(name='post_count')
+
+        # Sort by post count in descending order
+        active_days = active_days.sort_values(by='post_count', ascending=False)
+
+        # Plot the results if requested
+        if plot:
+            self._plot_most_active_days(active_days)
+
+        return active_days
+
+    
+    

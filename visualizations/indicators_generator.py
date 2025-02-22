@@ -131,20 +131,22 @@ class IndicatorsGenerator:
         if self.df_posts.empty:
             return None
 
+        # Work with a copy to avoid modifying self.df_posts
+        df_copy = self.df_posts.copy()
+
         # Convert 'date' column to datetime and set timezone
-        self.df_posts['date'] = pd.to_datetime(self.df_posts['date']).dt.tz_localize(timezone)
+        df_copy['date'] = pd.to_datetime(df_copy['date']).dt.tz_localize(timezone)
 
         # Filter by date range if provided
         if start_date and end_date:
-            mask = (self.df_posts['date'] >= start_date) & (self.df_posts['date'] <= end_date)
-            self.df_posts = self.df_posts.loc[mask]
+            mask = (df_copy['date'] >= start_date) & (df_copy['date'] <= end_date)
+            df_copy = df_copy.loc[mask]
 
         # Extract day from the timestamp
-        self.df_posts['day'] = self.df_posts['date'].dt.date  # Use dt.date for specific dates
-        # Alternatively, use dt.day_name() for day of the week (e.g., Monday, Tuesday)
+        df_copy['day'] = df_copy['date'].dt.date  # Use dt.date for specific dates
 
         # Count posts per day
-        active_days = self.df_posts.groupby('day').size().reset_index(name='post_count')
+        active_days = df_copy.groupby('day').size().reset_index(name='post_count')
 
         # Sort by post count in descending order
         active_days = active_days.sort_values(by='post_count', ascending=False)

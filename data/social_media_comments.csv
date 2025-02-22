@@ -1,25 +1,25 @@
-comment_id,post_id,comment_text,comment_date,comment_sentiment,
-1,101,"""Great post!""",10/1/2023,0.9,
-2,101,"""I disagree with this.""",10/1/2023,0.2,
-3,102,"""Amazing content!""",10/2/2023,0.95,
-4,102,"""This is not helpful.""",10/2/2023,0.1,
-5,103,"""Love this!""",10/3/2023,0.85,
-6,103,"""Could be better.""",10/3/2023,0.4,
-7,104,"""Interesting perspective.""",10/4/2023,0.75,
-8,104,"""Not a fan of this.""",10/4/2023,0.3,
-9,105,"""This is awesome!""",10/5/2023,0.95,
-10,105,"""Meh, it's okay.""",10/5/2023,0.5,
-11,106,"""Best video ever!""",10/6/2023,1,
-12,106,"""Not my cup of tea.""",10/6/2023,0.25,
-13,107,"""Nice work!""",10/7/2023,0.85,
-14,107,"""Could use more details.""",10/7/2023,0.35,
-15,108,"""Fantastic video!""",10/8/2023,0.9,
-16,108,"""Not impressed.""",10/8/2023,0.15,
-17,109,"""Very informative.""",10/9/2023,0.8,
-18,109,"""Too long and boring.""",10/9/2023,0.2,
-19,110,"""Great job!""",10/10/2023,0.95,
-20,110,"""Not what I expected.""",10/10/2023,0.3,
-21,111,"""Beautiful image!""",10/11/2023,0.9,
-22,111,"""Overrated.""",10/11/2023,0.25,
-23,112,"""Incredible content!""",10/12/2023,1,
-24,112,"""Not my style.""",10/12/2023,0.2,
+comment_id,post_id,comment_text,comment_date,comment_sentiment
+1,101,"""Great post!""",10/1/2024,0.9
+2,101,"""I disagree with this.""",10/1/2024,0.2
+3,102,"""Amazing content!""",10/2/2024,0.95
+4,102,"""This is not helpful.""",10/2/2024,0.1
+5,103,"""Love this!""",10/3/2024,0.85
+6,103,"""Could be better.""",10/3/2024,0.4
+7,104,"""Interesting perspective.""",10/4/2024,0.75
+8,104,"""Not a fan of this.""",10/4/2024,0.3
+9,105,"""This is awesome!""",10/5/2024,0.95
+10,105,"""Meh, it's okay.""",10/5/2024,0.5
+11,106,"""Best video ever!""",10/6/2024,1
+12,106,"""Not my cup of tea.""",10/6/2024,0.25
+13,107,"""Nice work!""",10/7/2024,0.85
+14,107,"""Could use more details.""",10/7/2024,0.35
+15,108,"""Fantastic video!""",10/8/2024,0.9
+16,108,"""Not impressed.""",10/8/2024,0.15
+17,109,"""Very informative.""",10/9/2024,0.8
+18,109,"""Too long and boring.""",10/9/2024,0.2
+19,110,"""Great job!""",10/10/2024,0.95
+20,110,"""Not what I expected.""",10/10/2024,0.3
+21,111,"""Beautiful image!""",10/11/2024,0.9
+22,111,"""Overrated.""",10/11/2024,0.25
+23,112,"""Incredible content!""",10/12/2024,1
+24,112,"""Not my style.""",10/12/2024,0.2

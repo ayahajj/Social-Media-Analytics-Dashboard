@@ -226,7 +226,7 @@ with col1:
     st.markdown("### Most Active Times")
 
     if not df_posts.empty:
-        active_times = indicators_generator.generate_most_active_days(start_date='2023-09-01', end_date='2023-10-20', plot=False)
+        active_times = indicators_generator.generate_most_active_days(start_date='2024-09-01', end_date='2024-10-20', plot=False)
 
         # Plot the most active days
         fig, ax = plt.subplots(figsize=(10, 4))  # Adjust the figure size for better fit

@@ -16,7 +16,7 @@ class FacebookSpider(scrapy.Spider):
     name = "facebook_spider"
 
     def __init__(self):
-        self.driver = webdriver.Chrome(service=Service(r'C:\Users\moham\facebook_scraper\facebook_scraper\driver\chromedriver-win64\chromedriver.exe'))
+        self.driver = webdriver.Chrome(service=Service(r'C:\Users\moham\Social Media Analytics Dashboard\facebook_scraper\facebook_scraper\driver\chromedriver-win64\chromedriver.exe'))
         self.posts_df = pd.DataFrame(columns=[
             "user_id", "platform", "post_id", "date", "likes", "comments", "shares", "post_text", "post_origin_text", "date_scraped", "views", "followers", "country", "content_type", "sentiment_score"
         ])
@@ -107,26 +107,28 @@ class FacebookSpider(scrapy.Spider):
         except Exception as e:
             print("\n\n", "Page did not load properly:", e, "\n\n")
         
-        i=0
+        # Scroll to load posts (adjust the range for more posts)
+        total_scrolls = 800  # Total number of scrolls
+        scroll_amount = 600  # Pixels to scroll down
 
         # Scroll to load posts (adjust the range for more posts)
-        for _ in range(800):
-            scroll_amount = 600  # Pixels to scroll down
+        for scroll_count in range(1, total_scrolls + 1):  # Start from 1 for better readability
             self.driver.execute_script(f"window.scrollBy(0, {scroll_amount});")
             time.sleep(2)
-            i++
-            print(i)
+            print("\n\n", f"Scroll {scroll_count}/{total_scrolls} completed ({(scroll_count / total_scrolls) * 100:.2f}%)", "\n\n")
 
         # Extract posts
         posts = self.driver.find_elements(By.XPATH, "//div[contains(@class, 'x1yztbdb') and contains(@class, 'x1n2onr6') and contains(@class, 'xh8yej3') and contains(@class, 'x1ja2u2z')]")
         
+        total_posts = len(posts)  # Get total number of posts
         
         # Print the number of posts found
         print("\n\n", f"Number of posts found: {len(posts)}", "\n\n")
         time.sleep(5)
 
-        for post in posts:
-            print("\n\n", f"Post start", "\n\n")
+        for index, post in enumerate(posts, start=1):
+            print("\n\n",f"Post {index}/{total_posts} - Processing Start", "\n\n")
+            
             try:
                 post_id = str(uuid.uuid4())  # Generate a random UUID
 

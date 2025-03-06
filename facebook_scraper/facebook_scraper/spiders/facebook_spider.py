@@ -177,8 +177,6 @@ class FacebookSpider(scrapy.Spider):
                 print("\n\n", f"post_shares = {post_shares}", "\n\n")
                 print("\n\n", f"post_type = {post_type}", "\n\n")
 
-                time.sleep(2)
-
                 # Create a DataFrame from the new row
                 new_row = pd.DataFrame([{
                     "user_id": user_id,
@@ -206,16 +204,11 @@ class FacebookSpider(scrapy.Spider):
 
             except Exception as e:
                 print("\n\n", f"Unexpected error scraping post {post_id}: {e}", "\n\n")
-
-
-
-
-
-
-
-
-
-
+            
+            print("\n\n",f"Post {index}/{total_posts} - Processing End", "\n\n")
+            time.sleep(2)
+ 
+ 
     def get_youtube_post_type(self, post):
         try:
             # Get all child elements within the post
@@ -283,7 +276,7 @@ class FacebookSpider(scrapy.Spider):
             print("\n\n", "Page did not load properly:", e, "\n\n")
         
         # Scroll to load posts (adjust the range for more posts)
-        total_scrolls = 50  # Total number of scrolls
+        total_scrolls = 10  # Total number of scrolls
         scroll_amount = 600  # Pixels to scroll down
 
         # Scroll to load posts (adjust the range for more posts)
@@ -302,8 +295,8 @@ class FacebookSpider(scrapy.Spider):
         time.sleep(5)
 
         for index, post in enumerate(posts, start=1):
-            print("\n\n",f"Post {index}/{total_posts} - Processing Start", "\n\n")
             
+            print("\n\n",f"Post {index}/{total_posts} - Processing Start", "\n\n")
             try:
                 post_id = str(uuid.uuid4())  # Generate a random UUID
 
@@ -346,8 +339,6 @@ class FacebookSpider(scrapy.Spider):
                 print("\n\n", f"post_views = {post_views}", "\n\n")
                 print("\n\n", f"post_type = {post_type}", "\n\n")
 
-                time.sleep(2)
-
                 # Create a DataFrame from the new row
                 new_row = pd.DataFrame([{
                     "user_id": user_id,
@@ -375,6 +366,12 @@ class FacebookSpider(scrapy.Spider):
 
             except Exception as e:
                 print("\n\n", f"Unexpected error scraping post {post_id}: {e}", "\n\n")
+            
+            print("\n\n",f"Post {index}/{total_posts} - Processing End", "\n\n")
+            time.sleep(2)
+            
+
+
 
 
 

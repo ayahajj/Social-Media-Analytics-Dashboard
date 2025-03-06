@@ -33,7 +33,8 @@ class FacebookSpider(scrapy.Spider):
             self.save_data("facebook")
         
         try:
-            self.scrape_youtube_posts()            
+            a = ""
+            #self.scrape_youtube_posts()            
         except KeyboardInterrupt:
             print("Script stopped manually. Saving data...")
             self.save_data("youtube")
@@ -41,6 +42,17 @@ class FacebookSpider(scrapy.Spider):
             print(f"An error occurred: {e}")
             self.save_data("youtube")
       
+        try:
+            a = ""
+            self.login_instagram()
+            self.scrape_instagram_posts()            
+        except KeyboardInterrupt:
+            print("Script stopped manually. Saving data...")
+            self.save_data("instagram")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            self.save_data("instagram")
+        
         
         self.driver.quit()
 
@@ -381,4 +393,199 @@ class FacebookSpider(scrapy.Spider):
 
 
 
+    def get_instagram_post_type(self, post):
+        try:
+            # Get all child elements within the post
+            child_elements = post.find_elements(By.XPATH, ".//*")  
 
+            for element in child_elements:
+                post_classes = element.get_attribute("class")
+
+                # Check for video post
+                if element.tag_name == "video" and "x1lliihq x5yr21d xh8yej3" in element.get_attribute("class"):
+                    return "video"
+                    
+                # Check for image post
+                if element.tag_name == "img" and "x5yr21d xu96u03 x10l6tqk x13vifvy x87ps6o xh8yej3" in element.get_attribute("class"):
+                    return "image"
+              
+            return "text"  # Default to text post if no specific classes are found
+
+        except Exception as e:
+            print(f"Error determining post type: {e}")
+            return "unknown"
+
+
+
+
+
+    def login_instagram(self):
+        print("Navigating to login page...")
+        self.driver.get("https://www.instagram.com/accounts/login/")
+        time.sleep(2)
+
+        print("Entering credentials...")
+        email = self.driver.find_element(By.NAME, "username")
+        email.send_keys("test.mohammad2001")  # Replace with your email      email=  mohammad.sobbahi2001@gmail.com
+        password = self.driver.find_element(By.NAME, "password")
+        password.send_keys("P@ssw0rd1234")  # Replace with your password
+        password.send_keys(Keys.RETURN)
+
+        print("Waiting for login to complete...")
+        try:
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//main[@role='main']"))  # Example element
+            )
+        except Exception as e:
+            print("\n\n", "Login failed or took too long:", e, "\n\n")
+
+        time.sleep(10)
+
+
+    def scrape_instagram_posts(self):
+        print("\n\n", "Navigating to Aljazeera Instagram page...", "\n\n")
+        
+        user_id = "aljazeera"
+        self.driver.get("https://www.instagram.com/aljazeera/")
+
+        print("\n\n", "Waiting for page to load...", "\n\n")
+        try:
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, ".//div[contains(@class, 'x1lliihq') and contains(@class, 'x1n2onr6') and contains(@class, 'xh8yej3') and contains(@class, 'x4gyw5p') and contains(@class, 'x11i5rnm') and contains(@class, 'x1ntc13c') and contains(@class, 'x9i3mqj') and contains(@class, 'x2pgyrj')]"))  # Updated XPath
+            )
+            
+            print("\n\n", "Page loaded successfully. ", "\n\n")
+        except Exception as e:
+            print("\n\n", "Page did not load properly:", e, "\n\n")
+        
+        # Scroll to load posts (adjust the range for more posts)
+        total_posts_to_found = 200  # Total number of scrolls
+        
+        
+        # open first post
+        # Wait until the element is clickable, then click
+        try:
+            first_post = self.driver.find_elements(By.XPATH, ".//div[contains(@class, '_aagu')]")[0]  # Updated XPath
+        
+            first_post = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, ".//div[contains(@class, '_aagu')]"))
+            )
+            first_post.click()
+            
+            print("\n\n", "Post opened successfully. ", "\n\n")
+        except Exception as e:
+            print("\n\n", "Post did not open properly:", e, "\n\n")
+        
+        time.sleep(2)
+        
+        # extract from post
+        
+        post = first_post
+        
+        # loop over posts intended by clik on next, and exctract needs each time
+        for i in range(0, total_posts_to_found):
+            
+            print("\n\n",f"Post {str(i)}/{total_posts_to_found} - Processing Start", "\n\n")
+            
+            time.sleep(2)
+            # extract values from post
+            
+            # click on next button
+            try:            
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, ".//article[contains(@role, 'presentation') and contains(@class, '_aatb') and contains(@class, '_aati')]"))
+                )
+                
+                print("\n\n","Post " + str(i) + " Loaded111", "\n\n")
+                
+                post = self.driver.find_element(By.XPATH, ".//article[contains(@role, 'presentation') and contains(@class, '_aatb') and contains(@class, '_aati')]")
+                
+                print("\n\n","Post " + str(i) + " Loaded", "\n\n")
+                
+            except Exception as e:
+                print("\n\n","Post " + str(i) + " Failed Loaded", str(e), "\n\n")
+            
+            time.sleep(2)
+                
+            
+            try:
+                post_id = str(uuid.uuid4())  # Generate a random UUID
+
+                try:
+                    post_likes = post.find_element(By.XPATH, ".//span[contains(@class, 'x193iq5w') and contains(@class, 'xeuugli') and contains(@class, 'x1fj9vlw') and contains(@class, 'x13faqbe') and contains(@class, 'x1vvkbs') and contains(@class, 'xt0psk2') and contains(@class, 'x1i0vuye') and contains(@class, 'xvs91rp') and contains(@class, 'x1s688f') and contains(@class, 'x5n08af') and contains(@class, 'x10wh9bi') and contains(@class, 'x1wdrske') and contains(@class, 'x8viiok') and contains(@class, 'x18hxmgj')]").text
+                    #post_likes = post_likes[0].text if len(post_likes) > 1 else "N/A"
+                except NoSuchElementException:
+                    post_likes = "N/A  e"
+
+                post_comments = "N/A"
+                post_shares = "N/A"
+
+                try:
+                    post_text = post.find_element(By.XPATH, ".//h1[contains(@class, '_ap3a') and contains(@class, '_aaco') and contains(@class, '_aacu') and contains(@class, '_aacx') and contains(@class, '_aad7') and contains(@class, '_aade')]").text
+                    #post_text = post_text[0].text if len(post_text) > 1 else "N/A"
+                except NoSuchElementException:
+                    post_text = "N/A ee"
+     
+                try:
+                    post_date = post.find_element(By.XPATH, ".//time[contains(@class, 'x1p4m5qa')]").text
+                except NoSuchElementException:
+                    post_date = "N/A"
+
+                # Identify Post Type
+                post_type = self.get_instagram_post_type(post) if hasattr(self, 'get_instagram_post_type') else "N/A"
+
+                print("\n\n", f"post_text = {post_text}", "\n\n")
+                print("\n\n", f"post_id = {post_id}", "\n\n")
+                print("\n\n", f"post_date = {post_date}", "\n\n")
+                print("\n\n", f"post_likes = {post_likes}", "\n\n")
+                print("\n\n", f"post_comments = {post_comments}", "\n\n")
+                print("\n\n", f"post_shares = {post_shares}", "\n\n")
+                print("\n\n", f"post_type = {post_type}", "\n\n")
+
+                # Create a DataFrame from the new row
+                new_row = pd.DataFrame([{
+                    "user_id": user_id,
+                    "platform": "Instagram",
+                    "post_id": post_id,
+                    "date": post_date,
+                    "likes": post_likes,
+                    "comments": post_comments,
+                    "shares": post_shares,
+                    "post_text": post_text,
+                    "post_origin_text": post.text,
+                    "date_scraped": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "views": "N/A",
+                    "followers": "N/A",
+                    "country": "N/A",
+                    "content_type": post_type,
+                    "sentiment_score": "N/A"
+                }])
+
+                # Use pd.concat instead of append
+                self.posts_df = pd.concat([self.posts_df, new_row], ignore_index=True)
+
+                # Save data incrementally
+                self.save_data("instagram")
+
+            except Exception as e:
+                print("\n\n", f"Unexpected error scraping post {post_id}: {e}", "\n\n")
+            
+            print("\n\n",f"Post {str(i)}/{total_posts_to_found} - Processing End", "\n\n")            
+                        
+           # click on next button
+            try:
+                next_btn = self.driver.find_element(By.XPATH, ".//div[contains(@class, ' _aaqg') and contains(@class, ' _aaqh')]")
+            
+                next_btn = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, ".//div[contains(@class, ' _aaqg') and contains(@class, ' _aaqh')]"))
+                )
+                next_btn.click()
+                
+                print("\n\n", "next_btn click successfully. ", "\n\n")
+            except Exception as e:
+                print("\n\n", "next_btn did not click properly:", e, "\n\n")
+            
+            
+
+
+ 

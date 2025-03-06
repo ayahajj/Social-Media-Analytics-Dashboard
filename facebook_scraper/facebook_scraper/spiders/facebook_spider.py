@@ -240,7 +240,7 @@ class FacebookSpider(scrapy.Spider):
 
             # Check for specific element existence
             for info in element_info:
-                if info["tag"] == "ytd-backstage-image-renderer" and "style-scope" in info["classes"] and "ytd-backstage-post-renderer" in info["classes"]:
+                if info["tag"] == "ytd-backstage-image-renderer" and (("style-scope" in info["classes"] and "ytd-backstage-post-renderer" in info["classes"]) or ("style-scope" in info["classes"] and "ytd-post-multi-image-renderer" in info["classes"])):
                     return "image"
 
             # Check for specific element existence
@@ -276,13 +276,13 @@ class FacebookSpider(scrapy.Spider):
             print("\n\n", "Page did not load properly:", e, "\n\n")
         
         # Scroll to load posts (adjust the range for more posts)
-        total_scrolls = 10  # Total number of scrolls
+        total_scrolls = 100  # Total number of scrolls
         scroll_amount = 600  # Pixels to scroll down
 
         # Scroll to load posts (adjust the range for more posts)
         for scroll_count in range(1, total_scrolls + 1):  # Start from 1 for better readability
             self.driver.execute_script(f"window.scrollBy(0, {scroll_amount});")
-            time.sleep(2)
+            time.sleep(1)
             print("\n\n", f"Scroll {scroll_count}/{total_scrolls} completed ({(scroll_count / total_scrolls) * 100:.2f}%)", "\n\n")
 
         # Extract posts

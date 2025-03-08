@@ -34,35 +34,36 @@ class SocialMediaSpider(scrapy.Spider):
         - Scrapes YouTube posts from the "aljazeera" channel.
         - Logs into Instagram and scrapes posts from "aljazeera".
         """
+
         try:
             self.login_facebook()
-            self.scrape_facebook_posts("aljazeerachannel", 10)
+            self.scrape_facebook_posts("aljazeerachannel", 2)
         except KeyboardInterrupt:
             print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
             self.save_data("facebook")
         except Exception as e:
             print( "\n\n",f"Facebook Scraping error occurred: {e}", "\n\n")
             self.save_data("facebook")
-        
+
         try:
-            self.scrape_youtube_posts("aljazeera", 10)         
+            self.scrape_youtube_posts("aljazeera", 2)         
         except KeyboardInterrupt:
             print("\n\n","Youtube script stopped manually. Saving data...", "\n\n")
             self.save_data("youtube")
         except Exception as e:
             print( "\n\n",f"Youtube Scraping error occurred: {e}", "\n\n")
             self.save_data("youtube")
-      
+
         try:
-            self.login_instagram("aljazeera", 10)
-            self.scrape_instagram_posts()            
+            self.login_instagram()
+            self.scrape_instagram_posts("aljazeera", 2)            
         except KeyboardInterrupt:
             print("\n\n","Instagram script stopped manually. Saving data...", "\n\n")
             self.save_data("instagram")
         except Exception as e:
             print( "\n\n",f"Instagram Scraping error occurred: {e}", "\n\n")
             self.save_data("instagram")
-        
+
         self.driver.quit()
 
 
@@ -277,7 +278,7 @@ class SocialMediaSpider(scrapy.Spider):
         total_posts = len(posts)  # Get total number of posts
         
         # Print the number of posts found
-        print("\n\n", f"Youtube Post {index}/{total_posts} ({(index / total_posts) * 100:.2f}%) - Processing Start", "\n\n")
+        print("\n\n", f"Number of YouTube posts found: {len(posts)}", "\n\n")
         time.sleep(5)
 
         for index, post in enumerate(posts, start=1):
@@ -450,10 +451,10 @@ class SocialMediaSpider(scrapy.Spider):
             instagram_page_name (str): The name of the Instagram page to scrape.
             posts_to_scroll_for_count (int): The number of scrolls to perform to load more posts.
         """
-        print("\n\n", f"Navigating to {instagram_page_name} Youtube page...", "\n\n")
+        print("\n\n", f"Navigating to {instagram_page_name} Instagram page...", "\n\n")
         
         user_id = instagram_page_name
-        self.driver.get(f"https://www.instagram.com/@{youtube_page_name}/community/")
+        self.driver.get(f"https://www.instagram.com/{instagram_page_name}/")
 
         print("\n\n", "Waiting for Instagram page to load...", "\n\n")
         try:
@@ -491,7 +492,7 @@ class SocialMediaSpider(scrapy.Spider):
         # loop over posts intended by clik on next, and exctract needs each time
         for i in range(0, total_posts_to_found):
             
-            print("\n\n", f"Instagram Post {index}/{total_posts} ({(index / total_posts) * 100:.2f}%) - Processing Start", "\n\n")
+            print("\n\n", f"Instagram Post {i}/{total_posts_to_found} ({(i / total_posts_to_found) * 100:.2f}%) - Processing Start", "\n\n")
             
             time.sleep(2)
             # extract values from post
@@ -573,7 +574,7 @@ class SocialMediaSpider(scrapy.Spider):
             except Exception as e:
                 print("\n\n", f"Unexpected error scraping Instagram post {post_id}: {e}", "\n\n")
             
-            print("\n\n",f"Instagram  Post {index}/{total_posts} - Processing End", "\n\n")     
+            print("\n\n",f"Instagram  Post {i}/{total_posts_to_found} - Processing End", "\n\n")     
                         
            # click on next button
             try:

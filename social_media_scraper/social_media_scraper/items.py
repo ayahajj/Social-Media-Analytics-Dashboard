@@ -5,7 +5,7 @@
 
 import scrapy
 
-class FacebookScraperItem(scrapy.Item):
+class SocialMediaScraperItem(scrapy.Item):
     user_id = scrapy.Field()
     platform = scrapy.Field()
     post_id = scrapy.Field()

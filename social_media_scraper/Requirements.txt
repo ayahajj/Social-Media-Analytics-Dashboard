@@ -1,0 +1,4 @@
+cd C:\Users\moham\Social Media Analytics Dashboard\social_media_scraper
+
+scrapy crawl social_media_spider
+

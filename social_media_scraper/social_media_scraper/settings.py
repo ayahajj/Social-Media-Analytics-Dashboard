@@ -7,10 +7,10 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "facebook_scraper"
+BOT_NAME = "social_media_scraper"
 
-SPIDER_MODULES = ["facebook_scraper.spiders"]
-NEWSPIDER_MODULE = "facebook_scraper.spiders"
+SPIDER_MODULES = ["social_media_scraper.spiders"]
+NEWSPIDER_MODULE = "social_media_scraper.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -88,6 +88,6 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_STORAGE = "scrapy.extensions.httpcache.FilesystemCacheStorage"
 
 # Set settings whose default value is deprecated to a future-proof value
-BOT_NAME = "facebook_scraper"
+BOT_NAME = "social_media_scraper"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 ROBOTSTXT_OBEY = False

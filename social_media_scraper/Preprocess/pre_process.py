@@ -41,6 +41,10 @@ class PreProcess:
         self.df_post_youtube = pd.read_excel(r'social_media_scraper\Scraping_Output\youtube_data.xlsx')
         self.df_post_instagram = pd.read_excel(r'social_media_scraper\Scraping_Output\instagram_data.xlsx')
         
+        print("\n\n", self.df_post_facebook.shape, "\n\n")
+        print("\n\n",  self.df_post_youtube.shape, "\n\n")
+        print("\n\n",  self.df_post_instagram.shape, "\n\n")
+        
         print("\n\n", "DataFrames Init DONE ...", "\n\n")
         
 
@@ -75,8 +79,8 @@ class PreProcess:
             return
         
         try:
-            # Save results in Final_Output as social_media_posts.csv
-            self.df_post_final.to_csv(r'social_media_scraper/Final_Output/social_media_posts.csv', index=False)
+            # Save results in Final_Output as social_media_posts.xlsx
+            self.df_post_final.to_excel(r'social_media_scraper/Final_Output/social_media_posts.xlsx', index=False)
             print("\n\n", "All Values Written to file - PreProcess End", "\n\n")
         except Exception as e:
             print("\n\n", "Error writing to file:", str(e), "\n\n")
@@ -300,19 +304,19 @@ class PreProcess:
 
         # Fill NaN values in 'comments' column with 0 and then apply a function to parse the values
         self.df_post_instagram['comments'] = self.df_post_instagram['comments'].fillna(0)
-        self.df_post_instagram['comments'] = self.df_post_instagram['comments'].apply(self.parse_instagram_likes)
+        # self.df_post_instagram['comments'] = self.df_post_instagram['comments'].apply(self.parse_instagram_likes)
 
         # Fill NaN values in 'shares' column with 0 and then apply a function to parse the values
         self.df_post_instagram['shares'] = self.df_post_instagram['shares'].fillna(0)
-        self.df_post_instagram['shares'] = self.df_post_instagram['shares'].apply(self.parse_instagram_likes)
+        # self.df_post_instagram['shares'] = self.df_post_instagram['shares'].apply(self.parse_instagram_likes)
 
         # Fill NaN values in 'views' column with 0 and then apply a function to parse the values
         self.df_post_instagram['views'] = self.df_post_instagram['views'].fillna(0)
-        self.df_post_instagram['views'] = self.df_post_instagram['views'].apply(self.parse_instagram_likes)
+        # self.df_post_instagram['views'] = self.df_post_instagram['views'].apply(self.parse_instagram_likes)
 
         # Fill NaN values in 'followers' column with 0 and then apply a function to parse the values
         self.df_post_instagram['followers'] = self.df_post_instagram['followers'].fillna(0)
-        self.df_post_instagram['followers'] = self.df_post_instagram['followers'].apply(self.parse_instagram_likes)
+        self.df_post_instagram['followers'] = self.df_post_instagram['followers'].apply(self.parse_youtube_likes_comments_shares_views_followers)
 
         # Fill NaN values in 'country' column with an empty string
         self.df_post_instagram['country'] = self.df_post_instagram['country'].fillna("")

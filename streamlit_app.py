@@ -14,7 +14,7 @@ import time
 import threading
 import os
 
-DATA_FILE = r"social_media_scraper\Final_Output\social_media_posts.csv"
+DATA_FILE = r"social_media_scraper\Final_Output\social_media_posts.xlsx"
 LAST_SCRAPE_FILE  = r"social_media_scraper\Final_Output\last_updated.txt"
 SCRAPE_LOCK_FILE = r"social_media_scraper\Final_Output\scraper.lock"  # File to track running status of scraper
 
@@ -54,7 +54,16 @@ def run_scraper(wait=False):
            
         finally:
             os.remove(SCRAPE_LOCK_FILE)  # Remove lock file after completion
-
+    def reload_page():
+        st.markdown(
+            """
+            <script>
+            window.location.reload();
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+    
     if is_scraper_running():
         print("\n\n", "Scraper Running, Prevent duplicate execution...", "\n\n")
         return  # Prevent duplicate execution if scraper already running
@@ -186,7 +195,14 @@ if "scraper_thread" not in st.session_state:
 
 #######################
 # Load data
-df_posts = pd.read_csv('data/social_media_posts.csv')
+df_posts = pd.DataFrame()
+
+try:
+    df_posts = pd.read_excel(r'social_media_scraper/Final_Output/social_media_posts.xlsx')
+except Exception as e:
+    st.error(f"❌ Excel file not found at Path.")
+    st.stop()  # Stop execution if the file is missing
+
 df_comments = pd.read_csv('data/social_media_comments.csv')
 
 # Convert 'date' and 'comment_date' columns to datetime
@@ -207,11 +223,11 @@ with st.sidebar:
     st.title('📊 Social Media Analytics Dashboard')
     
     # Extract unique dates from posts and comments
-    post_dates = df_posts['date'].dt.date.unique()
+    post_dates = df_posts.loc[df_posts['date'].notna(), 'date'].dt.date.unique()
     comment_dates = df_comments['comment_date'].dt.date.unique()
     
     # Combine and sort unique dates
-    all_dates = sorted(list(set(post_dates) | set(comment_dates)))
+    all_dates = sorted(list(set(post_dates)))
     
     # Date selection
     selected_date = st.selectbox('Select a date', all_dates)
@@ -238,7 +254,7 @@ with col1:
     platform_base64_icon = {
         'Facebook': utils.get_base64_icon("facebook.svg"),
         'Instagram': utils.get_base64_icon("instagram.svg"),
-        'YouTube': utils.get_base64_icon("youTube.svg")
+        'Youtube': utils.get_base64_icon("Youtube.svg")
     }
 
     # Create centered columns for platform cards

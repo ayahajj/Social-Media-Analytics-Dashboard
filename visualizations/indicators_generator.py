@@ -219,16 +219,7 @@ class IndicatorsGenerator:
         # Ensure 'comment_date' column is datetime (if needed for filtering)
         self.df_comments['comment_date'] = pd.to_datetime(self.df_comments['comment_date'])
 
-        # Merge comments with posts to get content_type
-        merged_data = pd.merge(
-            self.df_comments,
-            self.df_posts[['post_id', 'content_type']],
-            on='post_id',
-            how='left'
-        )
-
-        # Group by content_type and count comments
-        comments_by_type = merged_data.groupby('content_type').size().reset_index(name='comment_count')
+        comments_by_type = self.df_posts.groupby('content_type')['post_id'].count().reset_index(name='comment_count')
 
         # Calculate percentages
         comments_by_type['percentage'] = (comments_by_type['comment_count'] / comments_by_type['comment_count'].sum()) * 100

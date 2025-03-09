@@ -18,10 +18,10 @@ POSTS_MODEL = [
             "sentiment_score"
         ]
         
-FACEBOOK_LOGIN_PAGE = "https://www.facebook.com/login"
+FACEBOOK_LOGIN_PAGE = "https://www.facebook.com/login/"
 
-FACEBOOK_EMAIL = "mohammad.sobbahi2001@gmail.com"   #"mohammad.sobbahi@gmail.com"
-FACEBOOK_PASSWORD = "P@ssw0rd1234"  #"Moh@mmad"
+FACEBOOK_EMAIL = "mohammad.sobbahi@gmail.com"   #"mohammad.sobbahi2001@gmail.com"
+FACEBOOK_PASSWORD = "Moh@mmad"  #"P@ssw0rd1234"
 
         
 INSTAGRAM_LOGIN_PAGE = "https://www.instagram.com/accounts/login/"

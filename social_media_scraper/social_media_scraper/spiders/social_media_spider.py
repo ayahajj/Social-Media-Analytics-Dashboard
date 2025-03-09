@@ -37,7 +37,7 @@ class SocialMediaSpider(scrapy.Spider):
 
         try:
             self.login_facebook()
-            self.scrape_facebook_posts("aljazeerachannel", 2)
+            self.scrape_facebook_posts("aljazeerachannel", 20)
         except KeyboardInterrupt:
             print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
             self.save_data("facebook")
@@ -46,7 +46,7 @@ class SocialMediaSpider(scrapy.Spider):
             self.save_data("facebook")
 
         try:
-            self.scrape_youtube_posts("aljazeera", 2)         
+            self.scrape_youtube_posts("aljazeera", 20)         
         except KeyboardInterrupt:
             print("\n\n","Youtube script stopped manually. Saving data...", "\n\n")
             self.save_data("youtube")
@@ -56,7 +56,7 @@ class SocialMediaSpider(scrapy.Spider):
 
         try:
             self.login_instagram()
-            self.scrape_instagram_posts("aljazeera", 2)            
+            self.scrape_instagram_posts("aljazeera", 20)            
         except KeyboardInterrupt:
             print("\n\n","Instagram script stopped manually. Saving data...", "\n\n")
             self.save_data("instagram")
@@ -73,7 +73,8 @@ class SocialMediaSpider(scrapy.Spider):
         """
         print("\n\n", "Navigating to Facebook Login page...", "\n\n")
         self.driver.get(constants.FACEBOOK_LOGIN_PAGE)
-        time.sleep(2)
+        self.driver.get(constants.FACEBOOK_LOGIN_PAGE)
+        time.sleep(5)
 
         print("\n\n", "Entering Facebook Credentials...", "\n\n")
         email = self.driver.find_element(By.ID, "email")
@@ -132,6 +133,12 @@ class SocialMediaSpider(scrapy.Spider):
         # Print the number of posts found
         print("\n\n", f"Number of Facebook posts found: {len(posts)}", "\n\n")
         time.sleep(5)
+        
+        # followers at time of scrape       
+        try:
+            followers = self.driver.find_element(By.XPATH, ".//a[contains(@href, 'https://www.facebook.com/aljazeerachannel/followers/')]").text
+        except NoSuchElementException:
+            followers = "NA"
 
         for index, post in enumerate(posts, start=1):
             print("\n\n", f"Facebook Post {index}/{total_posts} ({(index / total_posts) * 100:.2f}%) - Processing Start", "\n\n")
@@ -175,6 +182,7 @@ class SocialMediaSpider(scrapy.Spider):
                 print("\n\n", f"Facebook post_likes = {post_likes}", "\n\n")
                 print("\n\n", f"Facebook post_comments = {post_comments}", "\n\n")
                 print("\n\n", f"Facebook post_shares = {post_shares}", "\n\n")
+                print("\n\n", f"Facebook followers = {followers}", "\n\n")
                 print("\n\n", f"Facebook post_type = {post_type}", "\n\n")
 
                 # Create a DataFrame from the new row
@@ -190,7 +198,7 @@ class SocialMediaSpider(scrapy.Spider):
                     "post_origin_text": post.text,
                     "date_scraped": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "views": "NA",
-                    "followers": "NA",
+                    "followers": followers,
                     "country": "NA",
                     "content_type": post_type,
                     "sentiment_score": "NA"
@@ -280,6 +288,13 @@ class SocialMediaSpider(scrapy.Spider):
         # Print the number of posts found
         print("\n\n", f"Number of YouTube posts found: {len(posts)}", "\n\n")
         time.sleep(5)
+        
+        # followers at time of scrape       
+        try:
+            followers = self.driver.find_elements(By.XPATH, ".//span[contains(@class, 'yt-core-attributed-string') and contains(@class, 'yt-content-metadata-view-model-wiz__metadata-text') and contains(@class, 'yt-core-attributed-string--white-space-pre-wrap') and contains(@class, 'yt-core-attributed-string--link-inherit-color')]")[1].text
+        except NoSuchElementException:
+            followers = "NA"
+            
 
         for index, post in enumerate(posts, start=1):
             
@@ -313,7 +328,7 @@ class SocialMediaSpider(scrapy.Spider):
                     post_date = post.find_element(By.XPATH, ".//yt-formatted-string[contains(@id, 'published-time-text') and contains(@class, 'style-scope') and contains(@class, 'ytd-backstage-post-renderer')]").text
                 except NoSuchElementException:
                     post_date = "NA"
-
+                    
                 # Identify Post Type
                 post_type = self.get_youtube_post_type(post) if hasattr(self, 'get_youtube_post_type') else "NA"
 
@@ -324,6 +339,7 @@ class SocialMediaSpider(scrapy.Spider):
                 print("\n\n", f"Youtube post_comments = {post_comments}", "\n\n")
                 print("\n\n", f"Youtube post_shares = {post_shares}", "\n\n")
                 print("\n\n", f"Youtube post_views = {post_views}", "\n\n")
+                print("\n\n", f"Youtube followers = {followers}", "\n\n")
                 print("\n\n", f"Youtube post_type = {post_type}", "\n\n")
 
                 # Create a DataFrame from the new row
@@ -339,7 +355,7 @@ class SocialMediaSpider(scrapy.Spider):
                     "post_origin_text": post.text,
                     "date_scraped": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "views": post_views,
-                    "followers": "NA",
+                    "followers": followers,
                     "country": "NA",
                     "content_type": post_type,
                     "sentiment_score": "NA"
@@ -424,7 +440,7 @@ class SocialMediaSpider(scrapy.Spider):
         """
         print("\n\n", "Navigating to Instagram Login page...", "\n\n")
         self.driver.get(constants.INSTAGRAM_LOGIN_PAGE)
-        time.sleep(2)
+        time.sleep(5)
 
         print("\n\n", "Entering Instagram Credentials...", "\n\n")
         email = self.driver.find_element(By.NAME, "username")
@@ -489,6 +505,13 @@ class SocialMediaSpider(scrapy.Spider):
         
         post = first_post
         
+        # followers at time of scrape       
+        try:
+            followers = self.driver.find_elements(By.XPATH, ".//li[contains(@class, 'xl565be') and contains(@class, 'x1m39q7l') and contains(@class, 'x1uw6ca5') and contains(@class, 'x2pgyrj')]")[1].text
+        except NoSuchElementException:
+            followers = "NA"
+            
+        
         # loop over posts intended by clik on next, and exctract needs each time
         for i in range(0, total_posts_to_found):
             
@@ -544,6 +567,7 @@ class SocialMediaSpider(scrapy.Spider):
                 print("\n\n", f"Instagram post_likes = {post_likes}", "\n\n")
                 print("\n\n", f"Instagram post_comments = {post_comments}", "\n\n")
                 print("\n\n", f"Instagram post_shares = {post_shares}", "\n\n")
+                print("\n\n", f"Instagram followers = {followers}", "\n\n")
                 print("\n\n", f"Instagram post_type = {post_type}", "\n\n")
 
                 # Create a DataFrame from the new row
@@ -559,7 +583,7 @@ class SocialMediaSpider(scrapy.Spider):
                     "post_origin_text": post.text,
                     "date_scraped": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "views": "NA",
-                    "followers": "NA",
+                    "followers": followers,
                     "country": "NA",
                     "content_type": post_type,
                     "sentiment_score": "NA"

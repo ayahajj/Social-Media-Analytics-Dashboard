@@ -67,7 +67,6 @@ def run_scraper(wait=False):
         time.sleep(2)
         threading.Thread(target=scrape, daemon=True).start()  # Run asynchronously
  
-
 def preprocess_data():
     """Clean and transform raw data after scraping."""
     try:
@@ -106,7 +105,7 @@ def scraper_background_task():
         
         time.sleep(0.25 * 60)  # Check every 1 minute instead of 30 min for better control
         
-        
+     
 #######################
 # Page configuration
 st.set_page_config(
@@ -175,12 +174,11 @@ if not os.path.exists(DATA_FILE):
     st.warning("🚀 Collecting data for the first time. Please wait...")
     run_scraper(wait=True)  # Wait for first scrape to finish
 
-# === Start Scraper Background Task (Runs Once) ===
+# Start Scraper Background Task (Runs Once)
 if "scraper_thread" not in st.session_state:
     scraper_thread = threading.Thread(target=scraper_background_task, daemon=True)
     scraper_thread.start()
     st.session_state["scraper_thread"] = scraper_thread
-
 
 #######################
 

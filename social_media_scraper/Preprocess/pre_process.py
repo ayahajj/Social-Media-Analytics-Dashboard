@@ -18,4 +18,4 @@ class PreProcess:
         
 
     def do_preprocessing(self):
-        a = ""
+        return True

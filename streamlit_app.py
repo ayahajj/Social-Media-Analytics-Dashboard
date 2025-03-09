@@ -6,10 +6,107 @@ import altair as alt
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from social_media_scraper.Preprocess.pre_process import PreProcess
 from visualizations.indicators_generator import IndicatorsGenerator
 from utils import Utils
+import subprocess
+import time
+import threading
+import os
 
+DATA_FILE = r"social_media_scraper\Final_Output\social_media_posts.csv"
+LAST_SCRAPE_FILE  = r"social_media_scraper\Final_Output\last_updated.txt"
+SCRAPE_LOCK_FILE = r"social_media_scraper\Final_Output\scraper.lock"  # File to track running status of scraper
+
+SCRAPE_PATH = r"C:\Users\moham\Social Media Analytics Dashboard\social_media_scraper"
+SCRAPE_INTERVAL = 30 * 60  # 30 minutes in seconds
+
+def run_scraper(wait=False):
+    """Run Scrapy spider. If wait=True, block until it finishes."""
+    def scrape():
+        
+        try:
+            # Create lock file to indicate Scrapy is running
+            open(SCRAPE_LOCK_FILE, "w").close()
+          
+            print("\n\n", "Scraper Run Invoked...", "\n\n")
+            time.sleep(20)
+            #subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=SCRAPE_PATH)
+            
+            print("\n\n", "Scraper DONE...", "\n\n")
+            time.sleep(2)
+            
+            print("\n\n", "Preprocessing Started...", "\n\n")
+            time.sleep(2)
+            
+            preprocess_data()  # Run preprocessing immediately after scraping
+            
+            print("\n\n", "Preprocessing Ended...", "\n\n")
+            time.sleep(2)
+            
+            set_last_scrape_time()  # Update last scrape time
+            
+            print("\n\n", "Dashboard Refreshed...", "\n\n")
+            
+            # refresh dashboard
+            st.rerun()
+           
+        finally:
+            os.remove(SCRAPE_LOCK_FILE)  # Remove lock file after completion
+
+    if is_scraper_running():
+        print("\n\n", "Scraper Running, Prevent duplicate execution...", "\n\n")
+        return  # Prevent duplicate execution if scraper already running
+    
+    if wait:
+        print("\n\n", "Running Scraper for the first time...", "\n\n")
+        time.sleep(2)
+        scrape()  # Run synchronously (blocking) for first run
+    else:
+        print("\n\n", "Running Scraper in the background...", "\n\n")
+        time.sleep(2)
+        threading.Thread(target=scrape, daemon=True).start()  # Run asynchronously
+ 
+
+def preprocess_data():
+    """Clean and transform raw data after scraping."""
+    try:
+        pre_process = PreProcess()
+        pre_process.do_preprocessing()
+    except Exception as e:
+        st.error(f"Preprocessing error: {e}")
+        
+def get_last_scrape_time():
+    """Returns last scrape timestamp, or None if not found."""
+    if os.path.exists(LAST_SCRAPE_FILE):
+        with open(LAST_SCRAPE_FILE, "r") as f:
+            return float(f.read().strip())
+    return None
+
+def set_last_scrape_time():
+    """Stores the current timestamp as the last scrape time."""
+    with open(LAST_SCRAPE_FILE, "w") as f:
+        f.write(str(time.time()))
+
+def is_scraper_running():
+    """Checks if the scraper is already running."""
+    return os.path.exists(SCRAPE_LOCK_FILE)
+    
+def scraper_background_task():
+    """Background thread that runs Scrapy every 30 minutes."""
+    while True:
+        last_scrape = get_last_scrape_time()
+        current_time = time.time()
+        
+        print("\n\n", "Background Thread Check..." + str(current_time - last_scrape) + "/ " + str(SCRAPE_INTERVAL) + " " + str(is_scraper_running()), "\n\n")
+        
+        if last_scrape is None or ((current_time - last_scrape) > SCRAPE_INTERVAL and is_scraper_running() == False):
+            print("\n\n", "Background Thread Run Scraper...", "\n\n")
+            run_scraper()  # Run scraper only if not running
+        
+        time.sleep(0.25 * 60)  # Check every 1 minute instead of 30 min for better control
+        
+        
 #######################
 # Page configuration
 st.set_page_config(
@@ -71,6 +168,23 @@ st.markdown("""
 
 
 #######################
+# Manage Scraper
+
+# Run first Scrapy execution (blocking) if data does not exist
+if not os.path.exists(DATA_FILE):
+    st.warning("🚀 Collecting data for the first time. Please wait...")
+    run_scraper(wait=True)  # Wait for first scrape to finish
+
+# === Start Scraper Background Task (Runs Once) ===
+if "scraper_thread" not in st.session_state:
+    scraper_thread = threading.Thread(target=scraper_background_task, daemon=True)
+    scraper_thread.start()
+    st.session_state["scraper_thread"] = scraper_thread
+
+
+#######################
+
+#######################
 # Load data
 df_posts = pd.read_csv('data/social_media_posts.csv')
 df_comments = pd.read_csv('data/social_media_comments.csv')
@@ -86,6 +200,7 @@ utils = Utils(df_posts, df_comments)
 indicators_generator = IndicatorsGenerator(df_posts, df_comments)
 
 #######################
+
 
 # Sidebar
 with st.sidebar:

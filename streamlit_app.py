@@ -19,7 +19,7 @@ LAST_SCRAPE_FILE  = r"social_media_scraper\Final_Output\last_updated.txt"
 SCRAPE_LOCK_FILE = r"social_media_scraper\Final_Output\scraper.lock"  # File to track running status of scraper
 
 SCRAPE_PATH = r"C:\Users\moham\Social Media Analytics Dashboard\social_media_scraper"
-SCRAPE_INTERVAL = 30 * 60  # 30 minutes in seconds
+SCRAPE_INTERVAL = 1 * 60  # 30 minutes in seconds
 
 def run_scraper(wait=False):
     """Run Scrapy spider. If wait=True, block until it finishes."""
@@ -30,7 +30,8 @@ def run_scraper(wait=False):
             open(SCRAPE_LOCK_FILE, "w").close()
           
             print("\n\n", "Scraper Run Invoked...", "\n\n")
-            time.sleep(20)
+            #time.sleep(20)
+            time.sleep(5)
             #subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=SCRAPE_PATH)
             
             print("\n\n", "Scraper DONE...", "\n\n")
@@ -73,6 +74,7 @@ def preprocess_data():
         pre_process = PreProcess()
         pre_process.do_preprocessing()
     except Exception as e:
+        print("\n\n", f"Preprocessing error: {e}", "\n\n")
         st.error(f"Preprocessing error: {e}")
         
 def get_last_scrape_time():

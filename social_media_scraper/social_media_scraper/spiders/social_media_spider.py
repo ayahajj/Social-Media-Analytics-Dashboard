@@ -46,17 +46,17 @@ class SocialMediaSpider(scrapy.Spider):
             self.save_data("facebook")
         
         try:
-            self.scrape_youtube_posts("aljazeera", 2)         
+            self.scrape_youtube_posts("aljazeera", 20)         
         except KeyboardInterrupt:
             print("\n\n","Youtube script stopped manually. Saving data...", "\n\n")
             self.save_data("youtube")
         except Exception as e:
             print( "\n\n",f"Youtube Scraping error occurred: {e}", "\n\n")
             self.save_data("youtube")
-
+        
         try:
             self.login_instagram()
-            self.scrape_instagram_posts("aljazeera", 2)            
+            self.scrape_instagram_posts("aljazeera", 20)            
         except KeyboardInterrupt:
             print("\n\n","Instagram script stopped manually. Saving data...", "\n\n")
             self.save_data("instagram")
@@ -214,7 +214,7 @@ class SocialMediaSpider(scrapy.Spider):
 
         :param target_post_count: The number of posts to scrape.
         """
-        max_retries=10
+        max_retries=20
         scroll_amount=800
         retry_count = 0
         
@@ -239,23 +239,22 @@ class SocialMediaSpider(scrapy.Spider):
 
             # Stop when the target post count is reached
             if total_posts >= target_post_count:
-                print("\n\nTarget post count reached.\n\n")
+                print("\n\nTarget Facebook post count reached.\n\n")
                 return posts[:target_post_count]  # Return only the target number of posts
 
             # Retry if no posts are found
             if retry_count < max_retries:
                 print(f"\n\nNo nFacebook posts found. Retrying ({retry_count + 1}/{max_retries})...\n\n")
                 retry_count += 1
-                time.sleep(2)
                 continue  # Try again without increasing scroll count
 
             # Stop if fewer posts than the target are available
             if total_posts < target_post_count:
-                print("\n\nStopping: Not enough posts available.\n\n")
+                print("\n\nFacebook Stopping: Not enough posts available.\n\n")
                 return posts  # Return all available posts
 
         return posts  # Return whatever is available
-
+    
 
     def get_facebook_post_type(self, post):
         """
@@ -289,12 +288,12 @@ class SocialMediaSpider(scrapy.Spider):
             return "unknown"
 
 
-    def scrape_youtube_posts(self, youtube_page_name, posts_to_scroll_for_count):
+    def scrape_youtube_posts(self, youtube_page_name, target_post_count):
         """
         Scrapes posts from a specified Youtube page.
         Parameters:
             youtube_page_name (str): The name of the Youtube page to scrape.
-            posts_to_scroll_for_count (int): The number of scrolls to perform to load more posts.
+            target_post_count (int): The number of posts to load..
         """
         print("\n\n", f"Navigating to {youtube_page_name} Youtube page...", "\n\n")
         
@@ -310,18 +309,8 @@ class SocialMediaSpider(scrapy.Spider):
         except Exception as e:
             print("\n\n", "Youtube page did not load properly:", e, "\n\n")
         
-        # Scroll to load posts
-        total_scrolls = posts_to_scroll_for_count   # Total number of scrolls
-        scroll_amount = 600                         # Pixels to scroll down
-
-        # Scroll to load posts
-        for scroll_count in range(1, total_scrolls + 1):
-            self.driver.execute_script(f"window.scrollBy(0, {scroll_amount});")
-            time.sleep(1)
-            print("\n\n", f"Scroll Youtube {scroll_count}/{total_scrolls} completed ({(scroll_count / total_scrolls) * 100:.2f}%)", "\n\n")
-
         # Extract posts
-        posts = self.driver.find_elements(By.XPATH, "//div[contains(@id, 'main') and contains(@class, 'style-scope') and contains(@class, 'ytd-backstage-post-renderer')]")
+        posts = self.youtube_scroll_and_scrape(target_post_count)
         
         total_posts = len(posts)  # Get total number of posts
         
@@ -414,6 +403,55 @@ class SocialMediaSpider(scrapy.Spider):
             time.sleep(2)
     
  
+    def youtube_scroll_and_scrape(self, target_post_count):
+        """
+        Scrolls the YouTube page and scrapes posts until the target post count is reached,
+        or stops if fewer posts are available. Retries if no posts are found.
+
+        :param target_post_count: The number of posts to scrape.
+        """
+        max_retries=20
+        scroll_amount=800
+        retry_count = 0
+        
+        posts = []
+        total_posts = 0
+
+        while True:
+            # Scroll the page
+            self.driver.execute_script(f"window.scrollBy(0, {scroll_amount});")
+            time.sleep(2)
+        
+            # Extract posts
+            posts = self.driver.find_elements(By.XPATH, "//div[contains(@id, 'main') and contains(@class, 'style-scope') and contains(@class, 'ytd-backstage-post-renderer')]")
+            total_posts_old = total_posts
+            total_posts = len(posts)
+
+            print(f"\n\nYoutube Posts loaded: {total_posts}/{target_post_count} ({(total_posts / target_post_count) * 100:.2f}%) \n\n")
+
+            # Reset retry counter if posts are found
+            if total_posts > total_posts_old:
+                retry_count = 0
+
+            # Stop when the target post count is reached
+            if total_posts >= target_post_count:
+                print("\n\nYoutube Target post count reached.\n\n")
+                return posts[:target_post_count]  # Return only the target number of posts
+
+            # Retry if no posts are found
+            if retry_count < max_retries:
+                print(f"\n\nNo nYoutube posts found. Retrying ({retry_count + 1}/{max_retries})...\n\n")
+                retry_count += 1
+                continue  # Try again without increasing scroll count
+
+            # Stop if fewer posts than the target are available
+            if total_posts < target_post_count:
+                print("\n\nYoutube Stopping: Not enough posts available.\n\n")
+                return posts  # Return all available posts
+
+        return posts  # Return whatever is available
+
+ 
     def get_youtube_post_type(self, post):
         """
         Determines the type of a Youtube post.
@@ -500,7 +538,7 @@ class SocialMediaSpider(scrapy.Spider):
         time.sleep(10)
 
 
-    def scrape_instagram_posts(self, instagram_page_name, posts_to_scroll_for_count):
+    def scrape_instagram_posts(self, instagram_page_name, target_post_count):
         """
         Scrapes posts from a specified Instagram page.
         Parameters:
@@ -523,7 +561,7 @@ class SocialMediaSpider(scrapy.Spider):
             print("\n\n", "Instagram page did not load properly:", e, "\n\n")
         
         # Scroll to load posts
-        total_posts_to_found = posts_to_scroll_for_count     # Total number of scrolls
+        total_posts_to_found = target_post_count     # Total number of scrolls
         
         # open first post
         # Wait until the element is clickable, then click

@@ -37,14 +37,14 @@ class SocialMediaSpider(scrapy.Spider):
 
         try:
             self.login_facebook()
-            self.scrape_facebook_posts("aljazeerachannel", 2)
+            self.scrape_facebook_posts("aljazeerachannel", 20)
         except KeyboardInterrupt:
             print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
             self.save_data("facebook")
         except Exception as e:
             print( "\n\n",f"Facebook Scraping error occurred: {e}", "\n\n")
             self.save_data("facebook")
-
+        
         try:
             self.scrape_youtube_posts("aljazeera", 2)         
         except KeyboardInterrupt:
@@ -63,7 +63,7 @@ class SocialMediaSpider(scrapy.Spider):
         except Exception as e:
             print( "\n\n",f"Instagram Scraping error occurred: {e}", "\n\n")
             self.save_data("instagram")
-
+        
         self.driver.quit()
 
 
@@ -94,12 +94,12 @@ class SocialMediaSpider(scrapy.Spider):
         time.sleep(10)
 
 
-    def scrape_facebook_posts(self, facebook_page_name, posts_to_scroll_for_count):
+    def scrape_facebook_posts(self, facebook_page_name, target_post_count):
         """
         Scrapes posts from a specified Facebook page.
         Parameters:
             facebook_page_name (str): The name of the Facebook page to scrape.
-            posts_to_scroll_for_count (int): The number of scrolls to perform to load more posts.
+            target_post_count (int): The number of posts to load..
         """
         print("\n\n", f"Navigating to {facebook_page_name} Facebook page...", "\n\n")
         
@@ -115,18 +115,8 @@ class SocialMediaSpider(scrapy.Spider):
         except Exception as e:
             print("\n\n", "Facebook page did not load properly:", e, "\n\n")
         
-        # Scroll to load posts
-        total_scrolls = posts_to_scroll_for_count   # Total number of scrolls
-        scroll_amount = 600                         # Pixels to scroll down
-
-        # Scroll to load posts
-        for scroll_count in range(1, total_scrolls + 1):
-            self.driver.execute_script(f"window.scrollBy(0, {scroll_amount});")
-            time.sleep(2)
-            print("\n\n", f"Scroll Facebook {scroll_count}/{total_scrolls} completed ({(scroll_count / total_scrolls) * 100:.2f}%)", "\n\n")
-
         # Extract posts
-        posts = self.driver.find_elements(By.XPATH, "//div[contains(@class, 'x1yztbdb') and contains(@class, 'x1n2onr6') and contains(@class, 'xh8yej3') and contains(@class, 'x1ja2u2z')]")
+        posts = self.facebook_scroll_and_scrape(target_post_count)
         
         total_posts = len(posts)  # Get total number of posts
         
@@ -215,7 +205,57 @@ class SocialMediaSpider(scrapy.Spider):
             
             print("\n\n",f"Facebook  Post {index}/{total_posts} - Processing End", "\n\n")
             time.sleep(2)
- 
+
+
+    def facebook_scroll_and_scrape(self, target_post_count):
+        """
+        Scrolls the Facebook page and scrapes posts until the target post count is reached,
+        or stops if fewer posts are available. Retries if no posts are found.
+
+        :param target_post_count: The number of posts to scrape.
+        """
+        max_retries=10
+        scroll_amount=800
+        retry_count = 0
+        
+        posts = []
+        total_posts = 0
+
+        while True:
+            # Scroll the page
+            self.driver.execute_script(f"window.scrollBy(0, {scroll_amount});")
+            time.sleep(2)
+
+            # Extract posts
+            posts = self.driver.find_elements(By.XPATH, "//div[contains(@class, 'x1yztbdb') and contains(@class, 'x1n2onr6') and contains(@class, 'xh8yej3') and contains(@class, 'x1ja2u2z')]")
+            total_posts_old = total_posts
+            total_posts = len(posts)
+
+            print(f"\n\nFacebook Posts loaded: {total_posts}/{target_post_count} ({(total_posts / target_post_count) * 100:.2f}%) \n\n")
+
+            # Reset retry counter if posts are found
+            if total_posts > total_posts_old:
+                retry_count = 0
+
+            # Stop when the target post count is reached
+            if total_posts >= target_post_count:
+                print("\n\nTarget post count reached.\n\n")
+                return posts[:target_post_count]  # Return only the target number of posts
+
+            # Retry if no posts are found
+            if retry_count < max_retries:
+                print(f"\n\nNo nFacebook posts found. Retrying ({retry_count + 1}/{max_retries})...\n\n")
+                retry_count += 1
+                time.sleep(2)
+                continue  # Try again without increasing scroll count
+
+            # Stop if fewer posts than the target are available
+            if total_posts < target_post_count:
+                print("\n\nStopping: Not enough posts available.\n\n")
+                return posts  # Return all available posts
+
+        return posts  # Return whatever is available
+
 
     def get_facebook_post_type(self, post):
         """
@@ -465,7 +505,7 @@ class SocialMediaSpider(scrapy.Spider):
         Scrapes posts from a specified Instagram page.
         Parameters:
             instagram_page_name (str): The name of the Instagram page to scrape.
-            posts_to_scroll_for_count (int): The number of scrolls to perform to load more posts.
+            target_post_count (int): The number of scrolls to perform to load more posts.
         """
         print("\n\n", f"Navigating to {instagram_page_name} Instagram page...", "\n\n")
         

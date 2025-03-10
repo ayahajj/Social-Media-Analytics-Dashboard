@@ -37,7 +37,7 @@ class SocialMediaSpider(scrapy.Spider):
 
         try:
             self.login_facebook()
-            self.scrape_facebook_posts("aljazeerachannel", 20)
+            self.scrape_facebook_posts(constants.SCRAPE_PLATFORM_FACEBOOK_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)
         except KeyboardInterrupt:
             print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
             self.save_data("facebook")
@@ -46,7 +46,7 @@ class SocialMediaSpider(scrapy.Spider):
             self.save_data("facebook")
         
         try:
-            self.scrape_youtube_posts("aljazeera", 20)         
+            self.scrape_youtube_posts(constants.SCRAPE_PLATFORM_YOUTUBE_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)         
         except KeyboardInterrupt:
             print("\n\n","Youtube script stopped manually. Saving data...", "\n\n")
             self.save_data("youtube")
@@ -56,7 +56,7 @@ class SocialMediaSpider(scrapy.Spider):
         
         try:
             self.login_instagram()
-            self.scrape_instagram_posts("aljazeera", 20)            
+            self.scrape_instagram_posts(constants.SCRAPE_PLATFORM_INSTAGRAM_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)            
         except KeyboardInterrupt:
             print("\n\n","Instagram script stopped manually. Saving data...", "\n\n")
             self.save_data("instagram")

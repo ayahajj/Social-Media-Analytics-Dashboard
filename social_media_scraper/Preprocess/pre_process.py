@@ -77,6 +77,14 @@ class PreProcess:
             print("\n\n", "Error during Instagram PreProcessing:", str(e), "\n\n")
             traceback.print_exc()  # Prints the full traceback
             return
+            
+        try:
+            self.df_post_final['user_id'] = self.df_post_final['user_id'].iloc[0]
+            print("\n\n", "UserID set", "\n\n")
+        except Exception as e:
+            print("\n\n", "Error setting user_id:", str(e), "\n\n")
+            traceback.print_exc()  # Prints the full traceback
+            return
         
         try:
             # Save results in Final_Output as social_media_posts.xlsx

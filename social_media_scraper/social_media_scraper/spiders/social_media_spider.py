@@ -36,34 +36,37 @@ class SocialMediaSpider(scrapy.Spider):
         """
 
         try:
+            self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
             self.login_facebook()
             self.scrape_facebook_posts(constants.SCRAPE_PLATFORM_FACEBOOK_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)
         except KeyboardInterrupt:
             print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
-            self.save_data("facebook")
         except Exception as e:
             print( "\n\n",f"Facebook Scraping error occurred: {e}", "\n\n")
+        finally:
             self.save_data("facebook")
-        
+
         try:
+            self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
             self.scrape_youtube_posts(constants.SCRAPE_PLATFORM_YOUTUBE_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)         
         except KeyboardInterrupt:
             print("\n\n","Youtube script stopped manually. Saving data...", "\n\n")
-            self.save_data("youtube")
         except Exception as e:
             print( "\n\n",f"Youtube Scraping error occurred: {e}", "\n\n")
+        finally:
             self.save_data("youtube")
-        
+            
         try:
+            self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
             self.login_instagram()
             self.scrape_instagram_posts(constants.SCRAPE_PLATFORM_INSTAGRAM_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)            
         except KeyboardInterrupt:
             print("\n\n","Instagram script stopped manually. Saving data...", "\n\n")
-            self.save_data("instagram")
         except Exception as e:
             print( "\n\n",f"Instagram Scraping error occurred: {e}", "\n\n")
+        finally:
             self.save_data("instagram")
-        
+            
         self.driver.quit()
 
 
@@ -196,9 +199,6 @@ class SocialMediaSpider(scrapy.Spider):
 
                 # Use pd.concat instead of append
                 self.posts_df = pd.concat([self.posts_df, new_row], ignore_index=True)
-
-                # Save data incrementally
-                self.save_data("facebook")
 
             except Exception as e:
                 print("\n\n", f"Unexpected error scraping Facebook post {post_id}: {e}", "\n\n")
@@ -392,9 +392,6 @@ class SocialMediaSpider(scrapy.Spider):
 
                 # Use pd.concat instead of append
                 self.posts_df = pd.concat([self.posts_df, new_row], ignore_index=True)
-
-                # Save data incrementally
-                self.save_data("youtube")
 
             except Exception as e:
                 print("\n\n", f"Unexpected error scraping Youtube post {post_id}: {e}", "\n\n")
@@ -670,8 +667,6 @@ class SocialMediaSpider(scrapy.Spider):
                 # Use pd.concat instead of append
                 self.posts_df = pd.concat([self.posts_df, new_row], ignore_index=True)
 
-                # Save data incrementally
-                self.save_data("instagram")
 
             except Exception as e:
                 print("\n\n", f"Unexpected error scraping Instagram post {post_id}: {e}", "\n\n")
@@ -730,6 +725,14 @@ class SocialMediaSpider(scrapy.Spider):
         Parameters:
             platform (str): The name of the platform for which the data was scraped.
         """
+        file_path = f"Scraping_Output/{platform}_data.xlsx"
+        
+        # Ensure directory exists
+        os.makedirs("Scraping_Output", exist_ok=True)
+        # Remove file if it exists
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        
         with pd.ExcelWriter(f"Scraping_Output/{platform}_data.xlsx") as writer:
             self.posts_df.to_excel(writer, sheet_name="Posts", index=False)
 

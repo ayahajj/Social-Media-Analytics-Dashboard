@@ -34,7 +34,7 @@ class SocialMediaSpider(scrapy.Spider):
         - Scrapes YouTube posts from the "aljazeera" channel.
         - Logs into Instagram and scrapes posts from "aljazeera".
         """
-
+        """
         try:
             self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
             self.login_facebook()
@@ -55,7 +55,7 @@ class SocialMediaSpider(scrapy.Spider):
             print( "\n\n",f"Youtube Scraping error occurred: {e}", "\n\n")
         finally:
             self.save_data("youtube")
-            
+        """        
         try:
             self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
             self.login_instagram()
@@ -629,7 +629,7 @@ class SocialMediaSpider(scrapy.Spider):
                     post_text = "N/A ee"
      
                 try:
-                    post_date = post.find_element(By.XPATH, ".//time[contains(@class, 'x1p4m5qa')]").text
+                    post_date = post.find_element(By.XPATH, ".//time[contains(@class, 'x1p4m5qa')]").get_attribute("datetime")
                 except NoSuchElementException:
                     post_date = "NA"
 

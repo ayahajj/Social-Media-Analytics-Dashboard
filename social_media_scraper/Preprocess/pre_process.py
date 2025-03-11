@@ -350,20 +350,22 @@ class PreProcess:
 
     # Function to calculate post date
     def get_instagram_post_date(self, relative_time, scrape_date):
-        match = re.match(r"(\d+) (minute|hour|day|year)s? ago", relative_time)
-        if match:
-            value, unit = int(match.group(1)), match.group(2)
-            if unit == "minute":
-                return scrape_date - timedelta(minutes=value)
-            elif unit == "hour":
-                return scrape_date - timedelta(hours=value)
-            elif unit == "day":
-                return scrape_date - timedelta(days=value)
-            elif unit == "year":
-                return scrape_date.replace(year=scrape_date.year - value)
-        elif "edited" in relative_time:
-            return get_post_date(relative_time.replace(" (edited)", ""))
-        return None
+        return datetime.strptime(relative_time, "%Y-%m-%dT%H:%M:%S.%fZ")
+        
+        # match = re.match(r"(\d+) (minute|hour|day|year)s? ago", relative_time)
+        # if match:
+        #     value, unit = int(match.group(1)), match.group(2)
+        #     if unit == "minute":
+        #         return scrape_date - timedelta(minutes=value)
+        #     elif unit == "hour":
+        #         return scrape_date - timedelta(hours=value)
+        #     elif unit == "day":
+        #         return scrape_date - timedelta(days=value)
+        #     elif unit == "year":
+        #         return scrape_date.replace(year=scrape_date.year - value)
+        # elif "edited" in relative_time:
+        #     return get_post_date(relative_time.replace(" (edited)", ""))
+        # return None
        
 
 

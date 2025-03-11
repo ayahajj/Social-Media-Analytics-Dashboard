@@ -36,9 +36,9 @@ INSTAGRAM_PASSWORD = "P@ssw0rd1234"
 
 # Users To Scrape
 POST_COUNT_TO_SCRAPE_PER_PLATFORM = 20
-SCRAPE_PLATFORM_FACEBOOK_USER = "DonaldTrump"
-SCRAPE_PLATFORM_YOUTUBE_USER = "DonaldJTrumpforPresident"
-SCRAPE_PLATFORM_INSTAGRAM_USER = "realdonaldtrump"
+SCRAPE_PLATFORM_FACEBOOK_USER = "aljazeerachannel"
+SCRAPE_PLATFORM_YOUTUBE_USER = "aljazeera"
+SCRAPE_PLATFORM_INSTAGRAM_USER = "aljazeera"
 
 #################################
 # Dashboard Configurations

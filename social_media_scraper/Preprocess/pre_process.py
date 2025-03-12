@@ -13,6 +13,12 @@ from datetime import datetime, timedelta
 import re
 import os
 import traceback
+import nltk
+import string
+from nltk.corpus import stopwords
+from textblob import TextBlob
+from langdetect import detect, DetectorFactory
+nltk.download("stopwords")
 
 class PreProcess:
  
@@ -47,6 +53,12 @@ class PreProcess:
         
         print("\n\n", "DataFrames Init DONE ...", "\n\n")
         
+        # Ensure consistent language detection results
+        DetectorFactory.seed = 0  
+
+        # Download stopwords if not already downloaded
+        nltk.download("stopwords")
+        self.stop_words = set(stopwords.words("english"))
 
 
     def do_preprocessing(self):
@@ -83,6 +95,17 @@ class PreProcess:
             print("\n\n", "UserID set", "\n\n")
         except Exception as e:
             print("\n\n", "Error setting user_id:", str(e), "\n\n")
+            traceback.print_exc()  # Prints the full traceback
+            return
+        
+        try:
+            # Apply language detection and sentiment analysis
+            self.df_post_final["post_language"] = self.df_post_final["post_text"].apply(self.detect_language)
+            self.df_post_final["sentiment_score"] = self.df_post_final.apply(lambda row: self.analyze_sentiment(row["post_text"]) if row["post_language"] in ["en", "ar"] else None, axis=1)
+
+            print("\n\n", "Sentiment Score set", "\n\n")
+        except Exception as e:
+            print("\n\n", "Error Sentiment Score:", str(e), "\n\n")
             traceback.print_exc()  # Prints the full traceback
             return
         
@@ -366,10 +389,47 @@ class PreProcess:
         # elif "edited" in relative_time:
         #     return get_post_date(relative_time.replace(" (edited)", ""))
         # return None
-       
 
 
+    def detect_language(self, text):
+        """Detect the language using langdetect."""
+        try:
+            return detect(text)  # Returns language code (e.g., 'en', 'fr', 'es')
+        except:
+            return None  # Return None if detection fails
 
 
+    def preprocess_text(self, text):
+        """Clean and tokenize the text"""
+        # Check if the text is a string
+        if not isinstance(text, str):
+            return ""
+        
+        # Remove punctuation and convert to lowercase
+        text = text.lower().translate(str.maketrans("", "", string.punctuation))
+
+        # Tokenization and remove stopwords
+        words = text.split()
+        words = [word for word in words if word not in self.stop_words]
+
+        return " ".join(words)
+
+
+    def analyze_sentiment(self,text):
+        """Perform Sentiment Analysis using the textblob library
+        Return sentiment polarity (-1 to 1) only if the text is in English."""
+        print("Languge :", str(self.detect_language(text)))
+        
+        if self.detect_language(text) == "en":  # Only analyze if text is in English
+            processed_text = self.preprocess_text(text)
+            print("Sentiment English Check")
+            return TextBlob(processed_text).sentiment.polarity
+            
+        if self.detect_language(text) == "ar":  # Only analyze if text is in Arabic
+            processed_text = self.preprocess_text(text)
+            print("Sentiment Arabic Check")
+            return TextBlob(processed_text).sentiment.polarity
+            
+        return None  # Return None for non-English texts
 
 

@@ -3,9 +3,15 @@
 3- streamlit run streamlit_app.py
 
 ------------------------
+
 Libraries Needed are:
 
 streamlit
 pandas
 altair
 plotly
+
+------------------------
+pip install nltk textblob langdetect
+
+

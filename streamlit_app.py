@@ -271,7 +271,7 @@ with col1:
                         {row.platform}
                     </h3>
                     <h4 style="color: var(--text-color); font-size: 18px; margin-left:20px;"> 
-                        {row.followers:,}
+                        {row.formatted_followers}
                     </h4>
                 </div>
                 """,
@@ -322,7 +322,7 @@ with col2:
                         {label}
                     </h3>
                     <h4 style="color: var(--text-color); font-size: 18px; margin-left:20px;"> 
-                        {value:,}
+                        {value}
                     </h4>
                 </div>
                 """,
@@ -345,7 +345,7 @@ with col1:
     st.markdown("### Most Active Times")
 
     if not df_posts.empty:
-        active_times = indicators_generator.generate_most_active_days(start_date='2024-09-01', end_date='2024-10-20', plot=False)
+        active_times = indicators_generator.generate_most_active_days(start_date='2020-01-01', end_date='2030-01-01', plot=False)
 
         # Plot the most active days
         fig, ax = plt.subplots(figsize=(10, 4))  # Adjust the figure size for better fit

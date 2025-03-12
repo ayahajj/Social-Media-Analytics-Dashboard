@@ -16,11 +16,15 @@ class IndicatorsGenerator:
     def __init__(self, df_posts, df_comments):
         self.df_posts = df_posts
         self.df_comments = df_comments
+        self.utils = Utils(self.df_posts, self.df_comments)
+    
     
     # Returns a dictionary with the total number of followers per platform.
     def get_followers_per_platform(self):
         followers_per_platform = self.df_posts.groupby('platform')['followers'].max().reset_index()
+        followers_per_platform['formatted_followers'] = followers_per_platform['followers'].apply(self.utils.format_values)
         return followers_per_platform
+
 
     # Returns a dictionary with the total count of likes, comments, and shares.
     def get_engagement_metrics(self):
@@ -29,98 +33,48 @@ class IndicatorsGenerator:
         total_shares = self.df_posts['shares'].sum()
         
         engagement_metrics = {
-            'likes': total_likes,
-            'comments': total_comments,
-            'shares': total_shares
+            'likes': self.utils.format_values(total_likes),
+            'comments': self.utils.format_values(total_comments),
+            'shares': self.utils.format_values(total_shares)
         }
         return engagement_metrics
+    
     
     # Generate traffic analytics data based on views for each platform and 
     # return dict: {Platform: (Views, Percentage, Color)}
     def generate_traffic_data(self):
         if self.df_posts.empty:
             return {}
+        
+        df_copy = self.df_posts.copy()
+        
+        # Calculate total engagement (sum of views, comments, shares, and likes) per platform
+        df_copy['total_engagement'] = (
+            self.df_posts['comments'] + 
+            self.df_posts['shares'] + 
+            self.df_posts['likes']
+        )
 
-        utils = Utils(self.df_posts, self.df_comments)
+        platform_engagement = df_copy.groupby("platform")["total_engagement"].sum()
 
-        # total views per platform
-        platform_views = self.df_posts.groupby("platform")["views"].sum()
-
-        # Calculate total views
-        total_views = platform_views.sum()
-        if total_views == 0:
+        # Calculate total engagement across all platforms
+        total_engagement = platform_engagement.sum()
+        if total_engagement == 0:
             return {}
 
         # Generate traffic data
         traffic_data = {
-            platform: (views, views / total_views, utils.PLATFORM_COLORS.get(platform, "#000000"))
-            for platform, views in platform_views.items()
+            platform: (
+                engagement,  # Total engagement for the platform
+                engagement / total_engagement,  # Percentage of total engagement
+                self.utils.PLATFORM_COLORS.get(platform, "#000000")  # Platform color
+            )
+            for platform, engagement in platform_engagement.items()
         }
 
         return traffic_data
 
     
-    # Generates and displays a heatmap of engagement data using Plotly.
-    # Parameters:
-    # heatmap_data (pd.DataFrame): A DataFrame containing engagement data with columns 'platform', 'day', and 'engagement'.
-    # Returns: None: Displays the heatmap in a Streamlit application.
-    def generate_engagement_heatmap_data(self):
-        if self.df_posts.empty:
-            return None
-
-        # Extract day from the date
-        self.df_posts['day'] = pd.to_datetime(self.df_posts['date']).dt.date
-
-        # Calculate total engagement (likes + comments + shares)
-        self.df_posts['engagement'] = self.df_posts['likes'] + self.df_posts['comments'] + self.df_posts['shares']
-
-        # Group by platform and day, then calculate total engagement
-        heatmap_data = self.df_posts.groupby(['platform', 'day'])['engagement'].sum().reset_index()
-
-        return heatmap_data
-    
-    # Generates engagement heatmap data by calculating total engagement per platform per day.
-    # Parameters: df_posts (pd.DataFrame): A DataFrame containing post data with columns 'date', 'platform', 'likes', 
-    # 'comments', and 'shares'.
-    #  Returns: pd.DataFrame: A DataFrame with aggregated engagement data, including 'platform', 'day', and 'engagement'.
-    def plot_engagement_heatmap(self, heatmap_data):
-        if heatmap_data is None or heatmap_data.empty:
-            st.warning("No data available to generate the heatmap.")
-            return
-
-        # Pivot the data for the heatmap
-        heatmap_pivot = heatmap_data.pivot(index='platform', columns='day', values='engagement')
-
-        # Define custom colors for each platform
-        platform_colors = {
-            'YouTube': 'red',
-            'Facebook': 'blue',
-            'Instagram': 'magenta'
-        }
-
-        # Create the heatmap using Plotly Graph Objects
-        fig = go.Figure(data=go.Heatmap(
-            z=heatmap_pivot.values,  # Engagement values
-            x=heatmap_pivot.columns,  # Days
-            y=heatmap_pivot.index,    # Platforms
-            colorscale=[[0, 'white'], [1, platform_colors['YouTube']]],  # Custom colors
-            hoverongaps=False,
-            colorbar=dict(title="Engagement")
-        ))
-
-            # Customize layout
-        fig.update_layout(
-            title="",
-            xaxis_title="Day",
-            yaxis_title="Platform",
-            xaxis=dict(tickformat="%Y-%m-%d"),  # Format date on x-axis
-            yaxis=dict(autorange="reversed")     # Reverse y-axis to match typical heatmap orientation
-        )
-
-        # Display in Streamlit
-        st.plotly_chart(fig)
-        
-        
     # Analyzes and returns the most active days based on user post activity.
     # start_date (str, optional): Start date for filtering posts (format: 'YYYY-MM-DD'). Defaults to None.
     # end_date (str, optional): End date for filtering posts (format: 'YYYY-MM-DD'). Defaults to None.
@@ -157,10 +111,75 @@ class IndicatorsGenerator:
 
         return active_days
 
+
+
+
+    
+    
+    # Generates and displays a heatmap of engagement data using Plotly.
+    # Parameters:
+    # heatmap_data (pd.DataFrame): A DataFrame containing engagement data with columns 'platform', 'day', and 'engagement'.
+    # Returns: None: Displays the heatmap in a Streamlit application.
+    def generate_engagement_heatmap_data(self):
+        if self.df_posts.empty:
+            return None
+
+        # Extract day from the date
+        self.df_posts['day'] = pd.to_datetime(self.df_posts['date']).dt.date
+
+        # Calculate total engagement (likes + comments + shares)
+        self.df_posts['engagement'] = self.df_posts['likes'] + self.df_posts['comments'] + self.df_posts['shares']
+
+        # Group by platform and day, then calculate total engagement
+        heatmap_data = self.df_posts.groupby(['platform', 'day'])['engagement'].sum().reset_index()
+
+        return heatmap_data
+    
+    # Generates engagement heatmap data by calculating total engagement per platform per day.
+    # Parameters: df_posts (pd.DataFrame): A DataFrame containing post data with columns 'date', 'platform', 'likes', 
+    # 'comments', and 'shares'.
+    #  Returns: pd.DataFrame: A DataFrame with aggregated engagement data, including 'platform', 'day', and 'engagement'.
+    def plot_engagement_heatmap(self, heatmap_data):
+        if heatmap_data is None or heatmap_data.empty:
+            st.warning("No data available to generate the heatmap.")
+            return
+
+        # Pivot the data for the heatmap
+        heatmap_pivot = heatmap_data.pivot(index='platform', columns='day', values='engagement')
+
+        # Define custom colors for each platform
+        platform_colors = {
+            'Youtube': 'red',
+            'Facebook': 'blue',
+            'Instagram': 'magenta'
+        }
+
+        # Create the heatmap using Plotly Graph Objects
+        fig = go.Figure(data=go.Heatmap(
+            z=heatmap_pivot.values,  # Engagement values
+            x=heatmap_pivot.columns,  # Days
+            y=heatmap_pivot.index,    # Platforms
+            colorscale=[[0, 'white'], [1, platform_colors['Youtube']]],  # Custom colors
+            hoverongaps=False,
+            colorbar=dict(title="Engagement")
+        ))
+
+            # Customize layout
+        fig.update_layout(
+            title="",
+            xaxis_title="Day",
+            yaxis_title="Platform",
+            xaxis=dict(tickformat="%Y-%m-%d"),  # Format date on x-axis
+            yaxis=dict(autorange="reversed")     # Reverse y-axis to match typical heatmap orientation
+        )
+
+        # Display in Streamlit
+        st.plotly_chart(fig)
+        
+        
     # Generates a plot showing likes_reactions over months for different platforms.
     # Each platform will have one curve with custom colors.
     def generate_social_likes_reactions_plot(self):     
-        utils = Utils(self.df_posts, self.df_comments)
             
         # Ensure 'date' column is datetime
         self.df_posts['date'] = pd.to_datetime(self.df_posts['date'])
@@ -184,7 +203,7 @@ class IndicatorsGenerator:
 
         # Define custom colors for each platform
         platform_colors = {
-            'YouTube': utils.PLATFORM_COLORS.get('YouTube', "#000000"),  # Red
+            'Youtube': utils.PLATFORM_COLORS.get('Youtube', "#000000"),  # Red
             'Facebook': utils.PLATFORM_COLORS.get('Facebook', "#000000"),  # Facebook Blue
             'Instagram': utils.PLATFORM_COLORS.get('Instagram', "#000000"),  # Twitter Blue
             # Add more platforms and colors as needed
@@ -276,9 +295,9 @@ class IndicatorsGenerator:
 
         # Define custom colors for each platform
         platform_colors = {
-            'YouTube': utils.PLATFORM_COLORS.get('YouTube', "#000000"),  # Red
-            'Facebook': utils.PLATFORM_COLORS.get('Facebook', "#000000"),  # Facebook Blue
-            'Instagram': utils.PLATFORM_COLORS.get('Instagram', "#000000"),  # Twitter Blue
+            'Youtube': self.utils.PLATFORM_COLORS.get('Youtube', "#000000"),  # Red
+            'Facebook': self.utils.PLATFORM_COLORS.get('Facebook', "#000000"),  # Facebook Blue
+            'Instagram': self.utils.PLATFORM_COLORS.get('Instagram', "#000000"),  # Twitter Blue
             # Add more platforms and colors as needed
         }
 

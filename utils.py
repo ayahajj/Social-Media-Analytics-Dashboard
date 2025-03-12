@@ -7,7 +7,7 @@ class Utils:
     PLATFORM_COLORS = {
         "Facebook": "#4267B2",
         "Instagram": "#E1306C",
-        "YouTube": "#FF0000"
+        "Youtube": "#FF0000"
     }
         
     def __init__(self, df_posts, df_comments):
@@ -22,3 +22,15 @@ class Utils:
                 return f"data:image/svg+xml;base64,{base64.b64encode(img_file.read()).decode()}"
         except FileNotFoundError:
             return None  # Return None if the file doesn't exist
+    
+    # format a number by adding K or M
+    def format_values(self, values):
+        if values >= 1000000:
+            return f"{values / 1000000:.1f}M"
+        elif values >= 1000:
+            return f"{values / 1000:.1f}K"
+        else:
+            return str(values)
+            
+            
+            

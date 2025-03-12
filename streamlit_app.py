@@ -15,26 +15,18 @@ import threading
 import os
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
-
-DASHBOARD_REFRESH_INTERVAL_MIN = 1          # mintutes interval to refresh the dashboard
-SCRAPE_DATA_INTERVAL_MIN = 0.5                # mintutes interval to make a data scrape
-
-POSTS_DATA_FILE_PATH = r"social_media_scraper\Final_Output\social_media_posts.xlsx"                         # File containing the posts data to show on dashboard
-SCRAPE_THREAD_LOCK_FILE = r"social_media_scraper\Final_Output\scraper.lock"                                 # File to track running status of scraper
-LAST_SUCCESSFUL_SCRAPE_TIME_FILE  = r"social_media_scraper\Final_Output\last_updated.txt"                   # File containing time interval for the last scrape made time
-SCRAPE_PROCESS_EXECUTE_PATH = r"C:\Users\moham\Social Media Analytics Dashboard\social_media_scraper"       # Is the Path of the process to invoke scraper pipline
-
+from social_media_scraper.social_media_scraper import constants
 
 def run_scraper(wait=False):
     """Run Scrapy spider. If wait=True, block until it finishes."""
     def scrape():
         try:
             # Create lock file to indicate Scrapy is running
-            open(SCRAPE_THREAD_LOCK_FILE, "w").close()
+            open(constants.SCRAPE_THREAD_LOCK_FILE, "w").close()
           
             print("\n\n", "Scraper Run Started...", "\n\n")
             time.sleep(5)
-            #subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=SCRAPE_PROCESS_EXECUTE_PATH)
+            #subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=constants.SCRAPE_PROCESS_EXECUTE_PATH)
             
             print("\n\n", "Scraper Run Finished...", "\n\n")
             time.sleep(1)
@@ -50,8 +42,8 @@ def run_scraper(wait=False):
             set_last_scrape_time()  # Update last scrape time file
            
         finally:
-            if os.path.exists(SCRAPE_THREAD_LOCK_FILE):
-                os.remove(SCRAPE_THREAD_LOCK_FILE)  # Remove lock file after completion
+            if os.path.exists(constants.SCRAPE_THREAD_LOCK_FILE):
+                os.remove(constants.SCRAPE_THREAD_LOCK_FILE)  # Remove lock file after completion
     
     if is_scraper_running():
         print("\n\n", "Scraper Alread Running...", "\n\n")
@@ -69,21 +61,21 @@ def run_scraper(wait=False):
 
 def get_last_scrape_time():
     """Returns last scrape timestamp, or None if not found."""
-    if os.path.exists(LAST_SUCCESSFUL_SCRAPE_TIME_FILE):
-        with open(LAST_SUCCESSFUL_SCRAPE_TIME_FILE, "r") as f:
+    if os.path.exists(constants.LAST_SUCCESSFUL_SCRAPE_TIME_FILE):
+        with open(constants.LAST_SUCCESSFUL_SCRAPE_TIME_FILE, "r") as f:
             return float(f.read().strip())
     return None
 
 
 def set_last_scrape_time():
     """Stores the current timestamp as the last scrape time."""
-    with open(LAST_SUCCESSFUL_SCRAPE_TIME_FILE, "w") as f:
+    with open(constants.LAST_SUCCESSFUL_SCRAPE_TIME_FILE, "w") as f:
         f.write(str(time.time()))
 
 
 def is_scraper_running():
     """Checks if the scraper is already running."""
-    return os.path.exists(SCRAPE_THREAD_LOCK_FILE)
+    return os.path.exists(constants.SCRAPE_THREAD_LOCK_FILE)
   
   
 def scraper_background_task():
@@ -92,9 +84,9 @@ def scraper_background_task():
         last_scrape = get_last_scrape_time()
         current_time = time.time()
         
-        print("\n\n", "Background Thread Check..." + str(current_time - last_scrape) + "/ " + str(SCRAPE_DATA_INTERVAL_MIN*60) + " " + str(is_scraper_running()), "\n\n")
+        print("\n\n", "Background Thread Check..." + str(current_time - last_scrape) + "/ " + str(constants.SCRAPE_DATA_INTERVAL_MIN*60) + " " + str(is_scraper_running()), "\n\n")
         
-        if last_scrape is None or ((current_time - last_scrape) > (SCRAPE_DATA_INTERVAL_MIN * 60) and is_scraper_running() == False):
+        if last_scrape is None or ((current_time - last_scrape) > (constants.SCRAPE_DATA_INTERVAL_MIN * 60) and is_scraper_running() == False):
             print("\n\n", "Background Thread Run Scraper...", "\n\n")
             run_scraper()   # Run scraper only if not running
         
@@ -176,7 +168,7 @@ st.markdown("""
 #######################
 
 # Run first Scrapy execution (blocking) if data does not exist
-if not os.path.exists(POSTS_DATA_FILE_PATH):
+if not os.path.exists(constants.POSTS_DATA_FILE_PATH):
     st.warning("🚀 Collecting data for the first time. Please wait...")
     run_scraper(wait=True)  # Wait for first scrape to finish
 
@@ -509,7 +501,7 @@ st.markdown("---")  # Add a separator line
 # ==============================================================================
 
 print("\n\n", "Dashboard Refreshed ...", "\n\n")
-st_autorefresh(interval= DASHBOARD_REFRESH_INTERVAL_MIN * 60 * 1000, limit=None, key="fizzbuzzcounter")
+st_autorefresh(interval= constants.DASHBOARD_REFRESH_INTERVAL_MIN * 60 * 1000, limit=None, key="fizzbuzzcounter")
 
 # ==========================
 # 

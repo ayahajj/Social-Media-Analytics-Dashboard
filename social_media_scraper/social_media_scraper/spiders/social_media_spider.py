@@ -45,7 +45,7 @@ class SocialMediaSpider(scrapy.Spider):
             print( "\n\n",f"Facebook Scraping error occurred: {e}", "\n\n")
         finally:
             self.save_data("facebook")
-
+        """
         try:
             self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
             self.scrape_youtube_posts(constants.SCRAPE_PLATFORM_YOUTUBE_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)         
@@ -55,7 +55,7 @@ class SocialMediaSpider(scrapy.Spider):
             print( "\n\n",f"Youtube Scraping error occurred: {e}", "\n\n")
         finally:
             self.save_data("youtube")
-        """    
+        """   
         try:
             self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
             self.login_instagram()
@@ -66,7 +66,7 @@ class SocialMediaSpider(scrapy.Spider):
             print( "\n\n",f"Instagram Scraping error occurred: {e}", "\n\n")
         finally:
             self.save_data("instagram")
-            
+        """    
         self.driver.quit()
 
 

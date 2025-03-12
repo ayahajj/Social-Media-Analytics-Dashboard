@@ -49,4 +49,11 @@ SCRAPE_PLATFORM_INSTAGRAM_USER = "aljazeeraenglish"
 # Dashboard Configurations
 #################################
 
+DASHBOARD_REFRESH_INTERVAL_MIN = 1          # mintutes interval to refresh the dashboard
+SCRAPE_DATA_INTERVAL_MIN = 0.5                # mintutes interval to make a data scrape
+
+POSTS_DATA_FILE_PATH = r"social_media_scraper\Final_Output\social_media_posts.xlsx"                         # File containing the posts data to show on dashboard
+SCRAPE_THREAD_LOCK_FILE = r"social_media_scraper\Final_Output\scraper.lock"                                 # File to track running status of scraper
+LAST_SUCCESSFUL_SCRAPE_TIME_FILE  = r"social_media_scraper\Final_Output\last_updated.txt"                   # File containing time interval for the last scrape made time
+SCRAPE_PROCESS_EXECUTE_PATH = r"C:\Users\moham\Social Media Analytics Dashboard\social_media_scraper"       # Is the Path of the process to invoke scraper pipline
 

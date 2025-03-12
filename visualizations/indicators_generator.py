@@ -40,41 +40,6 @@ class IndicatorsGenerator:
         return engagement_metrics
     
     
-    # Generate traffic analytics data based on views for each platform and 
-    # return dict: {Platform: (Views, Percentage, Color)}
-    def generate_traffic_data(self):
-        if self.df_posts.empty:
-            return {}
-        
-        df_copy = self.df_posts.copy()
-        
-        # Calculate total engagement (sum of views, comments, shares, and likes) per platform
-        df_copy['total_engagement'] = (
-            self.df_posts['comments'] + 
-            self.df_posts['shares'] + 
-            self.df_posts['likes']
-        )
-
-        platform_engagement = df_copy.groupby("platform")["total_engagement"].sum()
-
-        # Calculate total engagement across all platforms
-        total_engagement = platform_engagement.sum()
-        if total_engagement == 0:
-            return {}
-
-        # Generate traffic data
-        traffic_data = {
-            platform: (
-                engagement,  # Total engagement for the platform
-                engagement / total_engagement,  # Percentage of total engagement
-                self.utils.PLATFORM_COLORS.get(platform, "#000000")  # Platform color
-            )
-            for platform, engagement in platform_engagement.items()
-        }
-
-        return traffic_data
-
-    
     # Analyzes and returns the most active days based on user post activity.
     # start_date (str, optional): Start date for filtering posts (format: 'YYYY-MM-DD'). Defaults to None.
     # end_date (str, optional): End date for filtering posts (format: 'YYYY-MM-DD'). Defaults to None.
@@ -112,10 +77,41 @@ class IndicatorsGenerator:
         return active_days
 
 
+    # Generate traffic analytics data based on views for each platform and 
+    # return dict: {Platform: (Views, Percentage, Color)}
+    def generate_traffic_data(self):
+        if self.df_posts.empty:
+            return {}
+        
+        df_copy = self.df_posts.copy()
+        
+        # Calculate total engagement (sum of views, comments, shares, and likes) per platform
+        df_copy['total_engagement'] = (
+            self.df_posts['comments'] + 
+            self.df_posts['shares'] + 
+            self.df_posts['likes']
+        )
+
+        platform_engagement = df_copy.groupby("platform")["total_engagement"].sum()
+
+        # Calculate total engagement across all platforms
+        total_engagement = platform_engagement.sum()
+        if total_engagement == 0:
+            return {}
+
+        # Generate traffic data
+        traffic_data = {
+            platform: (
+                engagement,  # Total engagement for the platform
+                engagement / total_engagement,  # Percentage of total engagement
+                self.utils.PLATFORM_COLORS.get(platform, "#000000")  # Platform color
+            )
+            for platform, engagement in platform_engagement.items()
+        }
+
+        return traffic_data
 
 
-    
-    
     # Generates and displays a heatmap of engagement data using Plotly.
     # Parameters:
     # heatmap_data (pd.DataFrame): A DataFrame containing engagement data with columns 'platform', 'day', and 'engagement'.
@@ -134,6 +130,7 @@ class IndicatorsGenerator:
         heatmap_data = self.df_posts.groupby(['platform', 'day'])['engagement'].sum().reset_index()
 
         return heatmap_data
+    
     
     # Generates engagement heatmap data by calculating total engagement per platform per day.
     # Parameters: df_posts (pd.DataFrame): A DataFrame containing post data with columns 'date', 'platform', 'likes', 
@@ -203,9 +200,9 @@ class IndicatorsGenerator:
 
         # Define custom colors for each platform
         platform_colors = {
-            'Youtube': utils.PLATFORM_COLORS.get('Youtube', "#000000"),  # Red
-            'Facebook': utils.PLATFORM_COLORS.get('Facebook', "#000000"),  # Facebook Blue
-            'Instagram': utils.PLATFORM_COLORS.get('Instagram', "#000000"),  # Twitter Blue
+            'Youtube': self.utils.PLATFORM_COLORS.get('Youtube', "#000000"),  # Red
+            'Facebook': self.utils.PLATFORM_COLORS.get('Facebook', "#000000"),  # Facebook Blue
+            'Instagram': self.utils.PLATFORM_COLORS.get('Instagram', "#000000"),  # Twitter Blue
             # Add more platforms and colors as needed
         }
 
@@ -232,6 +229,7 @@ class IndicatorsGenerator:
 
         # Show the plot in Streamlit
         st.pyplot(plt)
+
         
     # Generates a pie chart showing the distribution of comments by content type (e.g., video, photo, Text).
     def generate_comments_per_type_pie_chart(self):
@@ -245,10 +243,9 @@ class IndicatorsGenerator:
 
         # Define custom colors for each content type
         content_type_colors = {
-            'Image': '#FF0000',  # Red
-            'Video': '#3b5998',  # Facebook Blue
-            'Text': '#1DA1F2',  # Twitter Blue
-            # Add more content types and colors as needed
+            'image': '#FF0000',  # Red
+            'video': '#3b5998',  # Facebook Blue
+            'text': '#1DA1F2',  # Twitter Blue
         }
 
         # Plot the pie chart
@@ -267,7 +264,8 @@ class IndicatorsGenerator:
 
         # Show the plot in Streamlit
         st.pyplot(plt)
-        
+ 
+ 
     # Generates a plot showing total social sharing (sum of shares) over months for different platforms.
     # Each platform will have one curve with custom colors.
     def generate_social_resharing_plot(self):
@@ -325,7 +323,6 @@ class IndicatorsGenerator:
         # Show the plot in Streamlit
         st.pyplot(plt)
         
-        
-        
-        
-        
+
+
+

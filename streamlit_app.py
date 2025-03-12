@@ -26,7 +26,7 @@ def run_scraper(wait=False):
           
             print("\n\n", "Scraper Run Started...", "\n\n")
             time.sleep(5)
-            #subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=constants.SCRAPE_PROCESS_EXECUTE_PATH)
+            subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=constants.SCRAPE_PROCESS_EXECUTE_PATH)
             
             print("\n\n", "Scraper Run Finished...", "\n\n")
             time.sleep(1)
@@ -188,7 +188,6 @@ df_posts = pd.DataFrame()
 try:
     df_posts = pd.read_excel(r'social_media_scraper/Final_Output/social_media_posts.xlsx')
 except Exception as e:
-    st.error(f"❌ Excel file not found at Path.")
     st.stop()  # Stop execution if the file is missing
 
 df_comments = pd.read_csv('data/social_media_comments.csv')

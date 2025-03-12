@@ -35,7 +35,7 @@ INSTAGRAM_USERNAME = "test.mohammad2001"   #email=  mohammad.sobbahi2001@gmail.c
 INSTAGRAM_PASSWORD = "P@ssw0rd1234"
 
 # Users To Scrape
-POST_COUNT_TO_SCRAPE_PER_PLATFORM = 20
+POST_COUNT_TO_SCRAPE_PER_PLATFORM = 100
 
 #SCRAPE_PLATFORM_FACEBOOK_USER = "aljazeerachannel"
 #SCRAPE_PLATFORM_YOUTUBE_USER = "aljazeera"
@@ -45,12 +45,16 @@ SCRAPE_PLATFORM_FACEBOOK_USER = "aljazeera"
 SCRAPE_PLATFORM_YOUTUBE_USER = "aljazeeraenglish"
 SCRAPE_PLATFORM_INSTAGRAM_USER = "aljazeeraenglish"
 
+IS_FACEBOOK_SCRAPE = False
+IS_YOUTUBE_SCRAPE = True
+IS_INSTAGRAM_SCRAPE = False
+
 #################################
 # Dashboard Configurations
 #################################
 
 DASHBOARD_REFRESH_INTERVAL_MIN = 1          # mintutes interval to refresh the dashboard
-SCRAPE_DATA_INTERVAL_MIN = 30                # mintutes interval to make a data scrape
+SCRAPE_DATA_INTERVAL_MIN = 120              # mintutes interval to make a data scrape
 
 POSTS_DATA_FILE_PATH = r"social_media_scraper\Final_Output\social_media_posts.xlsx"                         # File containing the posts data to show on dashboard
 SCRAPE_THREAD_LOCK_FILE = r"social_media_scraper\Final_Output\scraper.lock"                                 # File to track running status of scraper

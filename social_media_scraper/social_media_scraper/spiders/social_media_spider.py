@@ -34,39 +34,41 @@ class SocialMediaSpider(scrapy.Spider):
         - Scrapes YouTube posts from the "aljazeera" channel.
         - Logs into Instagram and scrapes posts from "aljazeera".
         """
-
-        try:
-            self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
-            self.login_facebook()
-            self.scrape_facebook_posts(constants.SCRAPE_PLATFORM_FACEBOOK_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)
-        except KeyboardInterrupt:
-            print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
-        except Exception as e:
-            print( "\n\n",f"Facebook Scraping error occurred: {e}", "\n\n")
-        finally:
-            self.save_data("facebook")
-
-        try:
-            self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
-            self.scrape_youtube_posts(constants.SCRAPE_PLATFORM_YOUTUBE_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)         
-        except KeyboardInterrupt:
-            print("\n\n","Youtube script stopped manually. Saving data...", "\n\n")
-        except Exception as e:
-            print( "\n\n",f"Youtube Scraping error occurred: {e}", "\n\n")
-        finally:
-            self.save_data("youtube")
+        if constants.IS_FACEBOOK_SCRAPE:
+            try:
+                self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
+                self.login_facebook()
+                self.scrape_facebook_posts(constants.SCRAPE_PLATFORM_FACEBOOK_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)
+            except KeyboardInterrupt:
+                print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
+            except Exception as e:
+                print( "\n\n",f"Facebook Scraping error occurred: {e}", "\n\n")
+            finally:
+                self.save_data("facebook")
+                
+        if constants.IS_YOUTUBE_SCRAPE:
+            try:
+                self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
+                self.scrape_youtube_posts(constants.SCRAPE_PLATFORM_YOUTUBE_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)         
+            except KeyboardInterrupt:
+                print("\n\n","Youtube script stopped manually. Saving data...", "\n\n")
+            except Exception as e:
+                print( "\n\n",f"Youtube Scraping error occurred: {e}", "\n\n")
+            finally:
+                self.save_data("youtube")
    
-        try:
-            self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
-            self.login_instagram()
-            self.scrape_instagram_posts(constants.SCRAPE_PLATFORM_INSTAGRAM_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)            
-        except KeyboardInterrupt:
-            print("\n\n","Instagram script stopped manually. Saving data...", "\n\n")
-        except Exception as e:
-            print( "\n\n",f"Instagram Scraping error occurred: {e}", "\n\n")
-        finally:
-            self.save_data("instagram")
- 
+        if constants.IS_INSTAGRAM_SCRAPE:
+            try:
+                self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
+                self.login_instagram()
+                self.scrape_instagram_posts(constants.SCRAPE_PLATFORM_INSTAGRAM_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)            
+            except KeyboardInterrupt:
+                print("\n\n","Instagram script stopped manually. Saving data...", "\n\n")
+            except Exception as e:
+                print( "\n\n",f"Instagram Scraping error occurred: {e}", "\n\n")
+            finally:
+                self.save_data("instagram")
+     
         self.driver.quit()
 
 
@@ -214,8 +216,8 @@ class SocialMediaSpider(scrapy.Spider):
 
         :param target_post_count: The number of posts to scrape.
         """
-        max_retries=20
-        scroll_amount=800
+        max_retries=30
+        scroll_amount=1000
         retry_count = 0
         
         posts = []
@@ -407,8 +409,8 @@ class SocialMediaSpider(scrapy.Spider):
 
         :param target_post_count: The number of posts to scrape.
         """
-        max_retries=20
-        scroll_amount=800
+        max_retries=30
+        scroll_amount=1000
         retry_count = 0
         
         posts = []
@@ -734,6 +736,9 @@ class SocialMediaSpider(scrapy.Spider):
             os.remove(file_path)
         
         with pd.ExcelWriter(f"Scraping_Output/{platform}_data.xlsx") as writer:
+            self.posts_df.to_excel(writer, sheet_name="Posts", index=False)
+        
+        with pd.ExcelWriter(f"Scraping_Output/{platform}_data_backup.xlsx") as writer:
             self.posts_df.to_excel(writer, sheet_name="Posts", index=False)
 
         print("\n\n", f"Data saved to {platform}_data.xlsx", "\n\n")

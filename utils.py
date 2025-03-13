@@ -10,9 +10,8 @@ class Utils:
         "Youtube": "#FF0000"
     }
         
-    def __init__(self, df_posts, df_comments):
+    def __init__(self, df_posts):
         self.df_posts = df_posts
-        self.df_comments = df_comments
         
     # Convert a local image file to a base64-encoded string and return Base64 encoded string of the image
     def get_base64_icon(self, icon_name):

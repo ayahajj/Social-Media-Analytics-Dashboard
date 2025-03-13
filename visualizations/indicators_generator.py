@@ -13,10 +13,9 @@ from utils import Utils
 
 class IndicatorsGenerator:
     
-    def __init__(self, df_posts, df_comments):
+    def __init__(self, df_posts):
         self.df_posts = df_posts
-        self.df_comments = df_comments
-        self.utils = Utils(self.df_posts, self.df_comments)
+        self.utils = Utils(self.df_posts)
     
     
     # Returns a dictionary with the total number of followers per platform.
@@ -233,8 +232,6 @@ class IndicatorsGenerator:
         
     # Generates a pie chart showing the distribution of comments by content type (e.g., video, photo, Text).
     def generate_comments_per_type_pie_chart(self):
-        # Ensure 'comment_date' column is datetime (if needed for filtering)
-        self.df_comments['comment_date'] = pd.to_datetime(self.df_comments['comment_date'])
 
         comments_by_type = self.df_posts.groupby('content_type')['post_id'].count().reset_index(name='comment_count')
 
@@ -269,7 +266,7 @@ class IndicatorsGenerator:
     # Generates a plot showing total social sharing (sum of shares) over months for different platforms.
     # Each platform will have one curve with custom colors.
     def generate_social_resharing_plot(self):
-        utils = Utils(self.df_posts, self.df_comments)
+        utils = Utils(self.df_posts)
             
         # Ensure 'date' column is datetime
         self.df_posts['date'] = pd.to_datetime(self.df_posts['date'])

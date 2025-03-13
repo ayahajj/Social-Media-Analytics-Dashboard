@@ -191,17 +191,14 @@ try:
 except Exception as e:
     st.stop()  # Stop execution if the file is missing
 
-df_comments = pd.read_csv('data/social_media_comments.csv')
-
 # Convert 'date' and 'comment_date' columns to datetime
 df_posts['date'] = pd.to_datetime(df_posts['date'])
-df_comments['comment_date'] = pd.to_datetime(df_comments['comment_date'])
 
 # Utils
-utils = Utils(df_posts, df_comments)
+utils = Utils(df_posts)
 
 # Indicators Generator
-indicators_generator = IndicatorsGenerator(df_posts, df_comments)
+indicators_generator = IndicatorsGenerator(df_posts)
 
 #######################
 # Sidebar
@@ -211,7 +208,6 @@ with st.sidebar:
     
     # Extract unique dates from posts and comments
     post_dates = df_posts.loc[df_posts['date'].notna(), 'date'].dt.date.unique()
-    comment_dates = df_comments['comment_date'].dt.date.unique()
     
     # Combine and sort unique dates
     all_dates = sorted(list(set(post_dates)))
@@ -221,7 +217,6 @@ with st.sidebar:
     
     # Filter data based on selected date
     df_selected_date_posts = df_posts[df_posts['date'].dt.date == selected_date]
-    df_selected_date_comments = df_comments[df_comments['comment_date'].dt.date == selected_date]
     
 #######################
 # Dashboard Main Panel

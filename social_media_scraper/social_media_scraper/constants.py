@@ -35,7 +35,7 @@ INSTAGRAM_USERNAME = "test.mohammad2001"   #email=  mohammad.sobbahi2001@gmail.c
 INSTAGRAM_PASSWORD = "P@ssw0rd1234"
 
 # Users To Scrape
-POST_COUNT_TO_SCRAPE_PER_PLATFORM = 100
+POST_COUNT_TO_SCRAPE_PER_PLATFORM = 5
 
 #SCRAPE_PLATFORM_FACEBOOK_USER = "aljazeerachannel"
 #SCRAPE_PLATFORM_YOUTUBE_USER = "aljazeera"
@@ -45,9 +45,11 @@ SCRAPE_PLATFORM_FACEBOOK_USER = "aljazeera"
 SCRAPE_PLATFORM_YOUTUBE_USER = "aljazeeraenglish"
 SCRAPE_PLATFORM_INSTAGRAM_USER = "aljazeeraenglish"
 
+IS_SIMULATE_SCRAPE = True
+
 IS_FACEBOOK_SCRAPE = True
-IS_YOUTUBE_SCRAPE = False
-IS_INSTAGRAM_SCRAPE = False
+IS_YOUTUBE_SCRAPE = True
+IS_INSTAGRAM_SCRAPE = True
 
 #################################
 # Dashboard Configurations

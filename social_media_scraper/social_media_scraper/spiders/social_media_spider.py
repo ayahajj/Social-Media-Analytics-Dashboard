@@ -130,7 +130,7 @@ class SocialMediaSpider(scrapy.Spider):
         
         # followers at time of scrape       
         try:
-            followers = self.driver.find_element(By.XPATH, ".//a[contains(@href, 'https://www.facebook.com/aljazeerachannel/followers/')]").text
+            followers = self.driver.find_element(By.XPATH, f".//a[contains(@href, 'https://www.facebook.com/{facebook_page_name}/followers/')]").text
         except NoSuchElementException:
             followers = "NA"
 

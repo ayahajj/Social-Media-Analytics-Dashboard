@@ -26,7 +26,8 @@ def run_scraper(wait=False):
           
             print("\n\n", "Scraper Run Started...", "\n\n")
             time.sleep(5)
-            #subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=constants.SCRAPE_PROCESS_EXECUTE_PATH)
+            if constants.IS_SIMULATE_SCRAPE == False:
+                subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=constants.SCRAPE_PROCESS_EXECUTE_PATH)
             
             print("\n\n", "Scraper Run Finished...", "\n\n")
             time.sleep(1)

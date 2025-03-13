@@ -26,7 +26,7 @@ def run_scraper(wait=False):
           
             print("\n\n", "Scraper Run Started...", "\n\n")
             time.sleep(5)
-            subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=constants.SCRAPE_PROCESS_EXECUTE_PATH)
+            #subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=constants.SCRAPE_PROCESS_EXECUTE_PATH)
             
             print("\n\n", "Scraper Run Finished...", "\n\n")
             time.sleep(1)
@@ -171,6 +171,7 @@ st.markdown("""
 if not os.path.exists(constants.POSTS_DATA_FILE_PATH):
     st.warning("🚀 Collecting data for the first time. Please wait...")
     run_scraper(wait=True)  # Wait for first scrape to finish
+    st.rerun()
 
 # Start Scraper Background Task (Runs Once)
 if "scraper_thread" not in st.session_state:

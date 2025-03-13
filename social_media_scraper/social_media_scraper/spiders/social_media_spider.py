@@ -39,35 +39,34 @@ class SocialMediaSpider(scrapy.Spider):
                 self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
                 self.login_facebook()
                 self.scrape_facebook_posts(constants.SCRAPE_PLATFORM_FACEBOOK_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)
+                self.save_data("facebook")
             except KeyboardInterrupt:
                 print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
             except Exception as e:
                 print( "\n\n",f"Facebook Scraping error occurred: {e}", "\n\n")
-            finally:
-                self.save_data("facebook")
+            
                 
         if constants.IS_YOUTUBE_SCRAPE:
             try:
                 self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
-                self.scrape_youtube_posts(constants.SCRAPE_PLATFORM_YOUTUBE_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)         
+                self.scrape_youtube_posts(constants.SCRAPE_PLATFORM_YOUTUBE_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)
+                self.save_data("youtube")       
             except KeyboardInterrupt:
                 print("\n\n","Youtube script stopped manually. Saving data...", "\n\n")
             except Exception as e:
                 print( "\n\n",f"Youtube Scraping error occurred: {e}", "\n\n")
-            finally:
-                self.save_data("youtube")
+
    
         if constants.IS_INSTAGRAM_SCRAPE:
             try:
                 self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
                 self.login_instagram()
-                self.scrape_instagram_posts(constants.SCRAPE_PLATFORM_INSTAGRAM_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)            
+                self.scrape_instagram_posts(constants.SCRAPE_PLATFORM_INSTAGRAM_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)  
+                self.save_data("instagram")                
             except KeyboardInterrupt:
                 print("\n\n","Instagram script stopped manually. Saving data...", "\n\n")
             except Exception as e:
                 print( "\n\n",f"Instagram Scraping error occurred: {e}", "\n\n")
-            finally:
-                self.save_data("instagram")
      
         self.driver.quit()
 

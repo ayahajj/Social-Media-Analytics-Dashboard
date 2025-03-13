@@ -6,9 +6,103 @@ import altair as alt
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from social_media_scraper.Preprocess.pre_process import PreProcess
 from visualizations.indicators_generator import IndicatorsGenerator
 from utils import Utils
+import subprocess
+import time
+import threading
+import os
+import streamlit as st
+from streamlit_autorefresh import st_autorefresh
+from social_media_scraper.social_media_scraper import constants
+
+def run_scraper(wait=False):
+    """Run Scrapy spider. If wait=True, block until it finishes."""
+    def scrape():
+        try:
+            # Create lock file to indicate Scrapy is running
+            open(constants.SCRAPE_THREAD_LOCK_FILE, "w").close()
+          
+            print("\n\n", "Scraper Run Started...", "\n\n")
+            time.sleep(5)
+            if constants.IS_SIMULATE_SCRAPE == False:
+                subprocess.run(["scrapy", "crawl", "social_media_spider"], cwd=constants.SCRAPE_PROCESS_EXECUTE_PATH)
+            
+            print("\n\n", "Scraper Run Finished...", "\n\n")
+            time.sleep(1)
+            
+            print("\n\n", "Preprocessing Started...", "\n\n")
+            time.sleep(1)
+            
+            preprocess_data()  # Run preprocessing immediately after scraping
+            
+            print("\n\n", "Preprocessing Ended...", "\n\n")
+            time.sleep(1)
+            
+            set_last_scrape_time()  # Update last scrape time file
+           
+        finally:
+            if os.path.exists(constants.SCRAPE_THREAD_LOCK_FILE):
+                os.remove(constants.SCRAPE_THREAD_LOCK_FILE)  # Remove lock file after completion
+    
+    if is_scraper_running():
+        print("\n\n", "Scraper Alread Running...", "\n\n")
+        return  # Prevent duplicate execution if scraper already running
+    
+    if wait:
+        print("\n\n", "Running Scraper for the first time...", "\n\n")
+        time.sleep(1)
+        scrape()  # Run synchronously (blocking) for first run
+    else:
+        print("\n\n", "Running Scraper in the background thread...", "\n\n")
+        time.sleep(1)
+        threading.Thread(target=scrape, daemon=True).start()  # Run asynchronously
+
+
+def get_last_scrape_time():
+    """Returns last scrape timestamp, or None if not found."""
+    if os.path.exists(constants.LAST_SUCCESSFUL_SCRAPE_TIME_FILE):
+        with open(constants.LAST_SUCCESSFUL_SCRAPE_TIME_FILE, "r") as f:
+            return float(f.read().strip())
+    return None
+
+
+def set_last_scrape_time():
+    """Stores the current timestamp as the last scrape time."""
+    with open(constants.LAST_SUCCESSFUL_SCRAPE_TIME_FILE, "w") as f:
+        f.write(str(time.time()))
+
+
+def is_scraper_running():
+    """Checks if the scraper is already running."""
+    return os.path.exists(constants.SCRAPE_THREAD_LOCK_FILE)
+  
+  
+def scraper_background_task():
+    """Background thread that runs Scrapy every 30 minutes."""
+    while True:
+        last_scrape = get_last_scrape_time()
+        current_time = time.time()
+        
+        print("\n\n", "Background Thread Check..." + str(current_time - last_scrape) + "/ " + str(constants.SCRAPE_DATA_INTERVAL_MIN*60) + " " + str(is_scraper_running()), "\n\n")
+        
+        if last_scrape is None or ((current_time - last_scrape) > (constants.SCRAPE_DATA_INTERVAL_MIN * 60) and is_scraper_running() == False):
+            print("\n\n", "Background Thread Run Scraper...", "\n\n")
+            run_scraper()   # Run scraper only if not running
+        
+        time.sleep(60)      # Check every 1 minute
+
+
+def preprocess_data():
+    """Clean and transform raw data after scraping."""
+    try:
+        pre_process = PreProcess()
+        pre_process.do_preprocessing()
+    except Exception as e:
+        print("\n\n", f"Preprocessing error: {e}", "\n\n")
+        st.error(f"Preprocessing error: {e}")
+
 
 #######################
 # Page configuration
@@ -16,7 +110,8 @@ st.set_page_config(
     page_title="Social Media Analytics Dashboard",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded")
+    initial_sidebar_state="expanded"
+)
 
 # alt.themes.enable("dark")
 
@@ -69,45 +164,65 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+#######################
+# Manage Scraper
+#######################
+
+# Run first Scrapy execution (blocking) if data does not exist
+if not os.path.exists(constants.POSTS_DATA_FILE_PATH):
+    st.warning("🚀 Collecting data for the first time. Please wait...")
+    run_scraper(wait=True)  # Wait for first scrape to finish
+    st.rerun()
+
+# Start Scraper Background Task (Runs Once)
+if "scraper_thread" not in st.session_state:
+    scraper_thread = threading.Thread(target=scraper_background_task, daemon=True)
+    scraper_thread.start()
+    st.session_state["scraper_thread"] = scraper_thread
 
 #######################
 # Load data
-df_posts = pd.read_csv('data/social_media_posts.csv')
-df_comments = pd.read_csv('data/social_media_comments.csv')
+#######################
+
+# Load data
+df_posts = pd.DataFrame()
+
+try:
+    df_posts = pd.read_excel(r'social_media_scraper/Final_Output/social_media_posts.xlsx')
+except Exception as e:
+    st.stop()  # Stop execution if the file is missing
 
 # Convert 'date' and 'comment_date' columns to datetime
 df_posts['date'] = pd.to_datetime(df_posts['date'])
-df_comments['comment_date'] = pd.to_datetime(df_comments['comment_date'])
 
 # Utils
-utils = Utils(df_posts, df_comments)
+utils = Utils(df_posts)
 
 # Indicators Generator
-indicators_generator = IndicatorsGenerator(df_posts, df_comments)
+indicators_generator = IndicatorsGenerator(df_posts)
 
 #######################
-
 # Sidebar
+#######################
 with st.sidebar:
     st.title('📊 Social Media Analytics Dashboard')
     
     # Extract unique dates from posts and comments
-    post_dates = df_posts['date'].dt.date.unique()
-    comment_dates = df_comments['comment_date'].dt.date.unique()
+    post_dates = df_posts.loc[df_posts['date'].notna(), 'date'].dt.date.unique()
     
     # Combine and sort unique dates
-    all_dates = sorted(list(set(post_dates) | set(comment_dates)))
+    all_dates = sorted(list(set(post_dates)))
     
     # Date selection
     selected_date = st.selectbox('Select a date', all_dates)
     
     # Filter data based on selected date
     df_selected_date_posts = df_posts[df_posts['date'].dt.date == selected_date]
-    df_selected_date_comments = df_comments[df_comments['comment_date'].dt.date == selected_date]
     
 #######################
 # Dashboard Main Panel
 col1, col2 = st.columns([1, 1], gap="large")
+#######################
 
 # Column 1: Followers Per Platform
 with col1:
@@ -123,7 +238,7 @@ with col1:
     platform_base64_icon = {
         'Facebook': utils.get_base64_icon("facebook.svg"),
         'Instagram': utils.get_base64_icon("instagram.svg"),
-        'YouTube': utils.get_base64_icon("youTube.svg")
+        'Youtube': utils.get_base64_icon("Youtube.svg")
     }
 
     # Create centered columns for platform cards
@@ -152,7 +267,7 @@ with col1:
                         {row.platform}
                     </h3>
                     <h4 style="color: var(--text-color); font-size: 18px; margin-left:20px;"> 
-                        {row.followers:,}
+                        {row.formatted_followers}
                     </h4>
                 </div>
                 """,
@@ -203,7 +318,7 @@ with col2:
                         {label}
                     </h3>
                     <h4 style="color: var(--text-color); font-size: 18px; margin-left:20px;"> 
-                        {value:,}
+                        {value}
                     </h4>
                 </div>
                 """,
@@ -226,7 +341,7 @@ with col1:
     st.markdown("### Most Active Times")
 
     if not df_posts.empty:
-        active_times = indicators_generator.generate_most_active_days(start_date='2024-09-01', end_date='2024-10-20', plot=False)
+        active_times = indicators_generator.generate_most_active_days(start_date='2020-01-01', end_date='2030-01-01', plot=False)
 
         # Plot the most active days
         fig, ax = plt.subplots(figsize=(10, 4))  # Adjust the figure size for better fit
@@ -374,3 +489,16 @@ with col1:
 # 
 # ==========================
 st.markdown("---")  # Add a separator line
+
+
+
+# ==============================================================================
+# Dashboard Refreshing every specified DASHBOARD_REFRESH_INTERVAL_MIN
+# ==============================================================================
+
+print("\n\n", "Dashboard Refreshed ...", "\n\n")
+st_autorefresh(interval= constants.DASHBOARD_REFRESH_INTERVAL_MIN * 60 * 1000, limit=None, key="fizzbuzzcounter")
+
+# ==========================
+# 
+# ==========================

@@ -9,7 +9,7 @@ class Utils:
         "Instagram": "#E1306C",
         "Youtube": "#FF0000"
     }
-        
+
     def __init__(self, df_posts):
         self.df_posts = df_posts
         

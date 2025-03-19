@@ -15,7 +15,7 @@ import threading
 import os
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
-from social_media_scraper.social_media_scraper import constants
+import constants
 
 def run_scraper(wait=False):
     """Run Scrapy spider. If wait=True, block until it finishes."""

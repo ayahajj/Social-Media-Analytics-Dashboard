@@ -46,7 +46,7 @@ pip install -r requirements.txt
 ### 4. Configure Credentials
 Update the constants.py file with your social media platform credentials (e.g., Facebook, Instagram, YouTube).
 
-### 5. Running the Dashboard
+## Running the Dashboard
 To start the Streamlit app, run the following command:
 ```bash
 streamlit run streamlit_app.py
@@ -54,13 +54,13 @@ streamlit run streamlit_app.py
 
 Once the app is running, open your browser and navigate to the local URL provided in the terminal (usually http://localhost:8501).
 
-### 6. Auto-Refresh Feature
+## Auto-Refresh Feature
 The dashboard is designed to:
 - Automatically scrape data every **30 minutes**.
 - Refresh the displayed metrics every **5 minutes** to ensure the latest data is shown.
 
 
-### 7. Contributing
+## Contributing
 Contributions are welcome! If you'd like to contribute to this project, please follow these steps:
 - Fork the repository.
 - Create a new branch for your feature or bugfix.

@@ -322,4 +322,133 @@ class IndicatorsGenerator:
         
 
 
+    
+    # New method: Calculate total reach by platform
+    def get_reach_by_platform(self):
+        posts_df = self.df_posts.copy()
+        posts_df["total_reach"] = posts_df.apply(
+            lambda row: row["views"] if row["views"] > 0 else (row["likes"] + row["comments"] + row["shares"]),
+            axis=1
+        )
+        reach_by_platform = posts_df.groupby("platform")["total_reach"].sum().reset_index()
+        return reach_by_platform
+
+    # New method: Calculate total impressions by platform
+    def get_impressions_by_platform(self):
+        posts_df = self.df_posts.copy()
+        posts_df["total_impressions"] = posts_df.apply(
+            lambda row: row["views"] if row["views"] > 0 else (row["likes"] + row["comments"] + row["shares"]),
+            axis=1
+        )
+        impressions_by_platform = posts_df.groupby("platform")["total_impressions"].sum().reset_index()
+        return impressions_by_platform
+
+    # New method: Calculate average sentiment by platform
+    def get_sentiment_by_platform(self):
+        sentiment_by_platform = self.df_posts.groupby("platform")["sentiment_score"].mean().reset_index()
+        sentiment_by_platform.rename(columns={"comment_sentiment": "avg_sentiment"}, inplace=True)
+        return sentiment_by_platform
+
+    # New method: Get top 10 liked posts
+    def get_top_10_liked_posts(self):
+        top_10_liked_posts = self.df_posts.sort_values(by="likes", ascending=False).head(10)
+        return top_10_liked_posts
+
+    # New method: Get top 10 shared posts
+    def get_top_10_shared_posts(self):
+        top_10_shared_posts = self.df_posts.sort_values(by="shares", ascending=False).head(10)
+        return top_10_shared_posts
+
+    # New method: Generate engagement heatmap by hour and day of the week
+    def generate_engagement_heatmap_by_time(self):
+        posts_df = self.df_posts.copy()
+        posts_df["hour"] = posts_df["date"].dt.hour
+        posts_df["day_of_week"] = posts_df["date"].dt.day_name()
+        engagement_by_time = posts_df.groupby(["day_of_week", "hour"])[["likes", "comments", "shares"]].sum().reset_index()
+        engagement_by_time["total_engagement"] = engagement_by_time[["likes", "comments", "shares"]].sum(axis=1)
+        heatmap_data = engagement_by_time.pivot(index="day_of_week", columns="hour", values="total_engagement")
+        ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        heatmap_data = heatmap_data.reindex(ordered_days)
+        return heatmap_data
+
+    # New method: Plot engagement heatmap by time
+    def plot_engagement_heatmap_by_time(self):
+        heatmap_data = self.generate_engagement_heatmap_by_time()
+        if heatmap_data is None or heatmap_data.empty:
+            st.warning("No data available to generate the heatmap.")
+            return
+
+        fig = go.Figure(data=go.Heatmap(
+            z=heatmap_data.values,
+            x=heatmap_data.columns,
+            y=heatmap_data.index,
+            colorscale="YlGnBu",
+            colorbar=dict(title="Engagement")
+        ))
+        fig.update_layout(
+            xaxis=dict(title="Hour of the Day"),
+            yaxis=dict(title="Day of the Week")
+        )
+        st.plotly_chart(fig)
+
+    # New method: Plot pie chart for reach by platform
+    def plot_reach_by_platform(self):
+        reach_by_platform = self.get_reach_by_platform()
+        fig = px.pie(
+            reach_by_platform,
+            values="total_reach",
+            names="platform",
+            title="Post Reach Distribution by Platform",
+            color="platform",
+            color_discrete_map=self.utils.PLATFORM_COLORS  # Apply platform-specific colors
+        )
+        st.plotly_chart(fig)
+
+    # New method: Plot bar chart for impressions by platform
+    def plot_impressions_by_platform(self):
+        impressions_by_platform = self.get_impressions_by_platform()
+        fig = px.bar(
+            impressions_by_platform,
+            x="platform",
+            y="total_impressions",
+            title="Total Impressions by Platform",
+            labels={"total_impressions": "Total Impressions (Views)"},
+            color="platform",
+            color_discrete_map=self.utils.PLATFORM_COLORS  # Apply platform-specific colors
+        )
+        st.plotly_chart(fig)
+
+    # New method: Plot horizontal bar chart for top 10 liked posts
+    def plot_top_10_liked_posts(self):
+        top_10_liked_posts = self.get_top_10_liked_posts()
+        fig = px.bar(
+            top_10_liked_posts,
+            x="likes",
+            y="post_id",
+            orientation="h",
+            labels={"likes": "Likes", "post_id": "Post ID"},
+            color="platform",
+            color_discrete_map=self.utils.PLATFORM_COLORS  # Apply platform-specific colors
+        )
+        st.plotly_chart(fig)
+
+    # New method: Plot scatter plot for top 10 shared posts
+    def plot_top_10_shared_posts(self):
+        top_10_shared_posts = self.get_top_10_shared_posts()
+        fig = px.scatter(
+            top_10_shared_posts,
+            x="post_id",
+            y="shares",
+            size="shares",
+            color="platform",
+            hover_data=["platform", "shares"],
+            labels={"shares": "Number of Shares", "post_id": "Post ID"},
+            color_discrete_map= self.utils.PLATFORM_COLORS  # Apply platform-specific colors
+        )
+        fig.update_traces(marker=dict(opacity=0.8, line=dict(width=1, color="black")))
+        fig.update_layout(xaxis=dict(tickmode="linear"))
+        st.plotly_chart(fig)
+        
+
+
 

@@ -490,7 +490,42 @@ with col1:
 # ==========================
 st.markdown("---")  # Add a separator line
 
+# ==========================
+# Reach, Impressions, Sentiment, Top Posts, Engagement Heatmap by Time
+# ==========================
+st.markdown("### Post Reach and Impressions by Platform")
 
+# Display reach and impressions
+col1, col2 = st.columns(2)
+with col1:
+    indicators_generator.plot_reach_by_platform()
+
+with col2:
+    indicators_generator.plot_impressions_by_platform()
+
+# Display sentiment analysis
+st.markdown("---")
+st.markdown("### Average Sentiment by Platform")
+sentiment_by_platform = indicators_generator.get_sentiment_by_platform()
+if sentiment_by_platform is not None:
+    st.dataframe(sentiment_by_platform)
+else:
+    st.warning("No comments data available for sentiment analysis.")
+
+# Display top 10 liked posts
+st.markdown("---")
+st.markdown("### Top 10 Liked Posts")
+indicators_generator.plot_top_10_liked_posts()
+
+# Display top 10 shared posts
+st.markdown("---")
+st.markdown("### Top 10 Shared Posts")
+indicators_generator.plot_top_10_shared_posts()
+
+# Display engagement heatmap by time
+st.markdown("---")
+st.markdown("### Best Time to Post (Engagement Heatmap)")
+indicators_generator.plot_engagement_heatmap_by_time()
 
 # ==============================================================================
 # Dashboard Refreshing every specified DASHBOARD_REFRESH_INTERVAL_MIN

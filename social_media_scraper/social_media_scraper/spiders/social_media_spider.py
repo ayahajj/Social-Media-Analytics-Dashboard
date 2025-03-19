@@ -253,7 +253,7 @@ class SocialMediaSpider(scrapy.Spider):
 
             # Stop if fewer posts than the target are available
             if total_posts < target_post_count:
-                print("\n\nFacebook Stopping: Not enough posts available.\n\n")
+                print("\n\nFacebook Stopping: No enough posts available.\n\n")
                 return posts  # Return all available posts
 
         return posts  # Return whatever is available
@@ -446,7 +446,7 @@ class SocialMediaSpider(scrapy.Spider):
 
             # Stop if fewer posts than the target are available
             if total_posts < target_post_count:
-                print("\n\nYoutube Stopping: Not enough posts available.\n\n")
+                print("\n\nYoutube Stopping: No enough posts available.\n\n")
                 return posts  # Return all available posts
 
         return posts  # Return whatever is available

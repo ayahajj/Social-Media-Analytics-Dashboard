@@ -15,7 +15,7 @@ import threading
 import os
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
-from social_media_scraper.social_media_scraper import constants
+import constants
 
 def run_scraper(wait=False):
     """Run Scrapy spider. If wait=True, block until it finishes."""
@@ -47,7 +47,7 @@ def run_scraper(wait=False):
                 os.remove(constants.SCRAPE_THREAD_LOCK_FILE)  # Remove lock file after completion
     
     if is_scraper_running():
-        print("\n\n", "Scraper Alread Running...", "\n\n")
+        print("\n\n", "Scraper Already Running...", "\n\n")
         return  # Prevent duplicate execution if scraper already running
     
     if wait:
@@ -88,7 +88,7 @@ def scraper_background_task():
         print("\n\n", "Background Thread Check..." + str(current_time - last_scrape) + "/ " + str(constants.SCRAPE_DATA_INTERVAL_MIN*60) + " " + str(is_scraper_running()), "\n\n")
         
         if last_scrape is None or ((current_time - last_scrape) > (constants.SCRAPE_DATA_INTERVAL_MIN * 60) and is_scraper_running() == False):
-            print("\n\n", "Background Thread Run Scraper...", "\n\n")
+            print("\n\n", "Background Thread Runs Scraper...", "\n\n")
             run_scraper()   # Run scraper only if not running
         
         time.sleep(60)      # Check every 1 minute

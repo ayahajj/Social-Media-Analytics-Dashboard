@@ -1,0 +1,2 @@
+cd C:\Users\moham\Social Media Analytics Dashboard
+streamlit run streamlit_app.py

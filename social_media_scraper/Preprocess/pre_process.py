@@ -40,19 +40,11 @@ class PreProcess:
             "content_type", 
             "sentiment_score"
         ])
-        
-        print("\n\n", "Path " + str(os.getcwd()), "\n\n")
-        
+                
         self.df_post_facebook = pd.read_excel(r'social_media_scraper\Scraping_Output\facebook_data.xlsx')
         self.df_post_youtube = pd.read_excel(r'social_media_scraper\Scraping_Output\youtube_data.xlsx')
         self.df_post_instagram = pd.read_excel(r'social_media_scraper\Scraping_Output\instagram_data.xlsx')
-        
-        print("\n\n", self.df_post_facebook.shape, "\n\n")
-        print("\n\n",  self.df_post_youtube.shape, "\n\n")
-        print("\n\n",  self.df_post_instagram.shape, "\n\n")
-        
-        print("\n\n", "DataFrames Init DONE ...", "\n\n")
-        
+
         # Ensure consistent language detection results
         DetectorFactory.seed = 0  
 
@@ -422,12 +414,10 @@ class PreProcess:
         
         if self.detect_language(text) == "en":  # Only analyze if text is in English
             processed_text = self.preprocess_text(text)
-            print("Sentiment English Check")
             return TextBlob(processed_text).sentiment.polarity
             
         if self.detect_language(text) == "ar":  # Only analyze if text is in Arabic
             processed_text = self.preprocess_text(text)
-            print("Sentiment Arabic Check")
             return TextBlob(processed_text).sentiment.polarity
             
         return None  # Return None for non-English texts

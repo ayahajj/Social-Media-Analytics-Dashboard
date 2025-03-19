@@ -11,8 +11,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
-from .. import constants
+import sys
 import os
+# Add the path of the parent directory of the target file
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+import constants
 
 class SocialMediaSpider(scrapy.Spider):
     name = "social_media_spider"
@@ -30,22 +33,11 @@ class SocialMediaSpider(scrapy.Spider):
         Executes the scraping pipeline for Facebook, YouTube, and Instagram.
 
         Workflow:
-        - Logs into Facebook and scrapes posts from the "aljazeerachannel" page.
         - Scrapes YouTube posts from the "aljazeera" channel.
         - Logs into Instagram and scrapes posts from "aljazeera".
-        """
-        if constants.IS_FACEBOOK_SCRAPE:
-            try:
-                self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
-                self.login_facebook()
-                self.scrape_facebook_posts(constants.SCRAPE_PLATFORM_FACEBOOK_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)
-                self.save_data("facebook")
-            except KeyboardInterrupt:
-                print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
-            except Exception as e:
-                print( "\n\n",f"Facebook Scraping error occurred: {e}", "\n\n")
-            
-                
+        - Logs into Facebook and scrapes posts from the "aljazeerachannel" page.
+        """           
+
         if constants.IS_YOUTUBE_SCRAPE:
             try:
                 self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
@@ -56,7 +48,6 @@ class SocialMediaSpider(scrapy.Spider):
             except Exception as e:
                 print( "\n\n",f"Youtube Scraping error occurred: {e}", "\n\n")
 
-   
         if constants.IS_INSTAGRAM_SCRAPE:
             try:
                 self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
@@ -67,7 +58,18 @@ class SocialMediaSpider(scrapy.Spider):
                 print("\n\n","Instagram script stopped manually. Saving data...", "\n\n")
             except Exception as e:
                 print( "\n\n",f"Instagram Scraping error occurred: {e}", "\n\n")
-     
+
+        if constants.IS_FACEBOOK_SCRAPE:
+            try:
+                self.posts_df = pd.DataFrame(columns=constants.POSTS_MODEL)
+                self.login_facebook()
+                self.scrape_facebook_posts(constants.SCRAPE_PLATFORM_FACEBOOK_USER, constants.POST_COUNT_TO_SCRAPE_PER_PLATFORM)
+                self.save_data("facebook")
+            except KeyboardInterrupt:
+                print("\n\n","Facebook script stopped manually. Saving data...", "\n\n")
+            except Exception as e:
+                print( "\n\n",f"Facebook Scraping error occurred: {e}", "\n\n")
+
         self.driver.quit()
 
 
@@ -251,7 +253,7 @@ class SocialMediaSpider(scrapy.Spider):
 
             # Stop if fewer posts than the target are available
             if total_posts < target_post_count:
-                print("\n\nFacebook Stopping: Not enough posts available.\n\n")
+                print("\n\nFacebook Stopping: No enough posts available.\n\n")
                 return posts  # Return all available posts
 
         return posts  # Return whatever is available
@@ -444,7 +446,7 @@ class SocialMediaSpider(scrapy.Spider):
 
             # Stop if fewer posts than the target are available
             if total_posts < target_post_count:
-                print("\n\nYoutube Stopping: Not enough posts available.\n\n")
+                print("\n\nYoutube Stopping: No enough posts available.\n\n")
                 return posts  # Return all available posts
 
         return posts  # Return whatever is available

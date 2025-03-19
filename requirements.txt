@@ -1,17 +1,12 @@
-1- cd C:\Users\moham\Social Media Analytics Dashboard
-2- pip install streamlit pandas altair plotly streamlit-autorefresh
-3- streamlit run streamlit_app.py
-
-------------------------
-
-Libraries Needed are:
-
-streamlit
 pandas
+streamlit
 altair
 plotly
-
-------------------------
-pip install nltk textblob langdetect
-
-
+matplotlib
+seaborn
+nltk
+textblob
+langdetect
+selenium
+scrapy
+streamlit-autorefresh

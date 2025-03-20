@@ -45,7 +45,7 @@ SCRAPE_PLATFORM_YOUTUBE_USER = "aljazeeraenglish"
 SCRAPE_PLATFORM_INSTAGRAM_USER = "aljazeeraenglish"
 
 # Whether to simulate scraper or not
-IS_SIMULATE_SCRAPE = True
+IS_SIMULATE_SCRAPE = False
 
 # which platfrom to scrape
 IS_FACEBOOK_SCRAPE = True

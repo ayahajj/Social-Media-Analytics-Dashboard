@@ -57,7 +57,7 @@ IS_INSTAGRAM_SCRAPE = True
 #################################
 
 # mintutes interval to refresh the dashboard
-DASHBOARD_REFRESH_INTERVAL_MIN = 0.5
+DASHBOARD_REFRESH_INTERVAL_MIN = 5
 
 # mintutes interval to make a data scrape run
 SCRAPE_DATA_INTERVAL_MIN = 30

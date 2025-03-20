@@ -448,7 +448,173 @@ class IndicatorsGenerator:
         fig.update_traces(marker=dict(opacity=0.8, line=dict(width=1, color="black")))
         fig.update_layout(xaxis=dict(tickmode="linear"))
         st.plotly_chart(fig)
+
+
+    # Function to generate engagement stacked bar chart
+    def generate_engagement_across_platforms(self):
+        if self.df_posts.empty:
+            st.warning("No data available for engagement analysis.")
+            return
+        engagement_data = self.df_posts.groupby('platform').agg({
+            'likes': 'sum',
+            'comments': 'sum',
+            'shares': 'sum'
+        }).reset_index()
+        engagement_data = engagement_data.melt(id_vars='platform',
+                                               var_name='engagement_type',
+                                               value_name='count')
+        engagement_colors = {
+            'likes': '#1f77b4',  # Blue
+            'comments': '#ff7f0e',  # Orange
+            'shares': '#2ca02c'  # Green
+        }
+        fig = px.bar(
+            engagement_data,
+            x='platform',
+            y='count',
+            color='engagement_type',
+            labels={'count': 'Engagement Count', 'platform': 'Platform'},
+            color_discrete_map=engagement_colors,
+            barmode='stack'
+        )
+        # Customize layout
+        fig.update_layout(
+            xaxis_title="Platform",
+            yaxis_title="Engagement Count",
+            legend_title="Engagement Type"
+        )
+        # Display the chart in Streamlit
+        st.plotly_chart(fig)
+
+
+    # Function to generate engagement type distribution pie chart
+    def generate_engagement_type_distribution(self):
+        if self.df_posts.empty:
+            st.warning("No data available for engagement distribution analysis.")
+            return
+        total_likes = self.df_posts['likes'].sum()
+        total_comments = self.df_posts['comments'].sum()
+        total_shares = self.df_posts['shares'].sum()
+        engagement_data = {
+            'Engagement Type': ['Likes', 'Comments', 'Shares'],
+            'Count': [total_likes, total_comments, total_shares]
+        }
+        fig = px.pie(
+            engagement_data,
+            names='Engagement Type',
+            values='Count',
+            color='Engagement Type',
+            color_discrete_map={'Likes': '#1f77b4', 'Comments': '#ff7f0e', 'Shares': '#2ca02c'}
+        )
+        st.plotly_chart(fig)
+
+    
+    # Plots a bar chart comparing daily follower changes for a selected platform and month.
+    def plot_followers_comparison(self):
+
+        platform_options = self.df_posts["platform"].unique()
+        selected_platform = st.selectbox("Choose a platform:", platform_options)
+
+        df_filtered = self.df_posts[self.df_posts["platform"] == selected_platform].copy()
+
+        self.df_posts["month"] = self.df_posts["date"].dt.strftime('%Y-%m')  # Format YYYY-MM
+        month_options = self.df_posts["month"].unique()
+
+        selected_month = st.selectbox("Choose a month:", month_options)
+
+        df_filtered = df_filtered[df_filtered["month"] == selected_month].copy()
+
+        df_filtered = df_filtered.sort_values("date")
+
+        df_filtered["followers_change"] = df_filtered["followers"].diff().fillna(0)
+
+        df_filtered["day"] = df_filtered["date"].dt.day
+
+        all_days = pd.DataFrame({'day': range(1, df_filtered["date"].dt.days_in_month.max() + 1)})
+
+        df_final = all_days.merge(df_filtered[['day', 'followers_change']], on='day', how='left').fillna(0)
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Bar(
+            x=df_final["day"],
+            y=df_final["followers_change"],
+            name="Followers Change",
+            marker=dict(color=df_final["followers_change"].apply(lambda x: 'green' if x >= 0 else 'red')),
+            text=df_final["followers_change"],
+            textposition='outside',
+            orientation='v',
+        ))
+
+        fig.update_layout(
+            title=f"Followers Gained vs Lost for {selected_platform} ({selected_month})",
+            xaxis_title="Day of Month",
+            yaxis_title="Followers Change",
+            showlegend=False,
+            xaxis=dict(
+                tickmode='linear',
+                tick0=1,
+                dtick=1
+            ),
+            yaxis=dict(
+                tickmode='linear',
+                dtick=500
+            ),
+            template='plotly_white'
+        )
+
+        st.plotly_chart(fig)
+
+    
+    # Plots a horizontal bar chart showing absolute follower growth for each platform.
+    def plot_follower_absolute_growth(self):
+        platforms = self.df_posts["platform"].unique()
+        growth_data = []
+        for platform in platforms:
+            df_filtered = self.df_posts[self.df_posts["platform"] == platform]
+            first_date = df_filtered["date"].min()
+            last_date = df_filtered["date"].max()
+            first_followers = df_filtered[df_filtered["date"] == first_date]["followers"].iloc[0]
+            last_followers = df_filtered[df_filtered["date"] == last_date]["followers"].iloc[0]
+            absolute_growth = last_followers - first_followers
+            growth_data.append({
+                "platform": platform,
+                "absolute_growth": absolute_growth,
+                "first_date": first_date,
+                "last_date": last_date
+            })
+        growth_df = pd.DataFrame(growth_data)
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            y=growth_df["platform"],
+            x=growth_df["absolute_growth"],
+            orientation='h',
+            name="Follower Absolute Growth",
+            marker_color='blue',
+            text=growth_df["absolute_growth"],
+            textposition='inside',
+            insidetextanchor='start',
+        ))
+        max_growth = growth_df['absolute_growth'].max()
+        tick_step = max(500, max_growth // 10)
+        fig.update_layout(
+            title=f"Follower Absolute Growth by Platform (From First to Last Date)",
+            xaxis_title="Absolute Growth (Followers)",
+            yaxis_title="Platform",
+            barmode='stack',
+            showlegend=False,
+            template='plotly_white',
+            xaxis=dict(
+                title='Absolute Growth (Followers)',
+                tickmode='linear',
+                tick0=0,
+                dtick=tick_step,
+            )
+        )
+        st.plotly_chart(fig)
         
 
 
 
+
+        

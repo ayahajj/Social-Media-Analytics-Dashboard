@@ -110,7 +110,7 @@ st.set_page_config(
     page_title="Social Media Analytics Dashboard",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # alt.themes.enable("dark")
@@ -207,17 +207,17 @@ indicators_generator = IndicatorsGenerator(df_posts)
 with st.sidebar:
     st.title('📊 Social Media Analytics Dashboard')
     
-    # Extract unique dates from posts and comments
-    post_dates = df_posts.loc[df_posts['date'].notna(), 'date'].dt.date.unique()
+    # # Extract unique dates from posts and comments
+    # post_dates = df_posts.loc[df_posts['date'].notna(), 'date'].dt.date.unique()
     
-    # Combine and sort unique dates
-    all_dates = sorted(list(set(post_dates)))
+    # # Combine and sort unique dates
+    # all_dates = sorted(list(set(post_dates)))
     
-    # Date selection
-    selected_date = st.selectbox('Select a date', all_dates)
+    # # Date selection
+    # selected_date = st.selectbox('Select a date', all_dates)
     
-    # Filter data based on selected date
-    df_selected_date_posts = df_posts[df_posts['date'].dt.date == selected_date]
+    # # Filter data based on selected date
+    # df_selected_date_posts = df_posts[df_posts['date'].dt.date == selected_date]
     
 #######################
 # Dashboard Main Panel
@@ -486,13 +486,41 @@ with col1:
     
 
 # ==========================
-# 
+# Engagement Across Platforms, Engagement Type Distribution, Followers gained/lost, Follower Growth Rate
 # ==========================
 st.markdown("---")  # Add a separator line
+
+col1, col2 = st.columns([1, 1], gap="large")
+
+with col1:
+    st.markdown("### Engagement Across Platforms")
+    indicators_generator.generate_engagement_across_platforms()
+with col2:
+    st.markdown("### Engagement Type Distribution")
+    indicators_generator.generate_engagement_type_distribution()
+
+st.markdown("---")  # Add a separator line
+
+col1 = st.columns(1)[0]
+
+with col1:
+    st.markdown("### Followers gained/lost")
+    indicators_generator.plot_followers_comparison()
+
+st.markdown("---")  # Add a separator line
+
+col1 = st.columns(1)[0]
+
+with col1:
+    st.markdown("### Follower Growth Rate")
+    indicators_generator.plot_follower_absolute_growth()
 
 # ==========================
 # Reach, Impressions, Sentiment, Top Posts, Engagement Heatmap by Time
 # ==========================
+
+st.markdown("---")  # Add a separator line
+
 st.markdown("### Post Reach and Impressions by Platform")
 
 # Display reach and impressions

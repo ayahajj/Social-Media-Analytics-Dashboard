@@ -8,8 +8,9 @@ This project provides a dashboard for analyzing social media metrics from platfo
 1. [Prerequisites](#prerequisites)
 2. [Setup Instructions](#setup-instructions)
 3. [Running the Dashboard](#running-the-dashboard)
-4. [Auto-Refresh Feature](#auto-refresh-feature)
-5. [Contributing](#contributing)
+4. [System Flow](#system-flow)
+5. [Auto-Refresh Feature](#auto-refresh-feature)
+6. [Contributing](#contributing)
 
 ---
 
@@ -45,6 +46,11 @@ pip install -r requirements.txt
 ```
 ### 4. Configure Credentials
 Update the constants.py file with your social media platform credentials (e.g., Facebook, Instagram, YouTube).
+
+## System Flow  
+The system operates through a structured process, as illustrated in the flowchart below: 
+
+![System Flow](icons/SystemFlow.png)  
 
 ## Running the Dashboard
 To start the Streamlit app, run the following command:

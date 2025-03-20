@@ -55,7 +55,7 @@ IS_INSTAGRAM_SCRAPE = True
 #################################
 # Dashboard Configurations
 #################################
- 
+
 # mintutes interval to refresh the dashboard
 DASHBOARD_REFRESH_INTERVAL_MIN = 0.5
 

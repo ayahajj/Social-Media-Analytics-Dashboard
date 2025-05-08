@@ -72,5 +72,8 @@ SCRAPE_THREAD_LOCK_FILE = r"social_media_scraper\Final_Output\scraper.lock"
 LAST_SUCCESSFUL_SCRAPE_TIME_FILE  = r"social_media_scraper\Final_Output\last_updated.txt"      
 
 # Is the Path of the process to invoke scraper pipline
-SCRAPE_PROCESS_EXECUTE_PATH = r"C:\Users\moham\Social Media Analytics Dashboard\social_media_scraper"       
+import os
+
+BASE_DIR = os.getcwd()
+SCRAPE_PROCESS_EXECUTE_PATH = os.path.join(BASE_DIR, "social_media_scraper")
 

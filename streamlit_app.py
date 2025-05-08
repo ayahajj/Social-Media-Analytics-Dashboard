@@ -188,7 +188,8 @@ if "scraper_thread" not in st.session_state:
 df_posts = pd.DataFrame()
 
 try:
-    df_posts = pd.read_excel(r'social_media_scraper/Final_Output/social_media_posts.xlsx')
+    df_posts = pd.read_excel(constants.POSTS_DATA_FILE_PATH)
+
 except Exception as e:
     st.stop()  # Stop execution if the file is missing
 
